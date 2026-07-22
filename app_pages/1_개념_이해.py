@@ -22,8 +22,7 @@ st.markdown("""
 <div style="background-color:#3FA34D; color:white; display:inline-block; padding:6px 18px;
             border-radius:20px; font-weight:bold; margin-bottom:8px;">복사 평형</div>
 <p style="font-size:17px; text-align:center; line-height:1.8;">
-흡수하는 복사 에너지와<br>
-방출하는 복사 에너지의 양이 <span style="color:#D8443C; font-weight:bold;">같은</span> 상태
+<b style="color:#D8443C;">흡수</b>하는 복사 에너지의 양 = <b style="color:#2C6FBB;">방출</b>하는 복사 에너지의 양
 </p>
 </div>
 """, unsafe_allow_html=True)
@@ -64,7 +63,7 @@ with right_col:
                 padding:16px 20px; height:100%;">
     <h4 style="margin-top:0; color:#B5760F;">🌡️ 온실효과란?</h4>
     <p style="font-size:15px; line-height:1.7;">
-    <b>대기가 지표로 방출하는 복사 에너지 때문에 평균 기온이 높게 나타나는 현상</b>을
+    <b>대기가 지표로 방출하는 복사 에너지 때문에 평균 기온이 <b style="color:#D8443C;">높게</b> 나타나는 현상</b>을
     온실효과라고 합니다.
     </p>
     <p style="font-size:14px; line-height:1.6;">
@@ -84,7 +83,7 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("🎯 확인 문제 - 화살표를 클릭해보자!")
 st.markdown("""
-아래 그림은 대기가 있는 지구의 복사 평형을 나타낸 것입니다. 이 그림에는 화살표가 4개 있어요.
+아래 그림은 대기가 있는 지구의 복사 평형을 나타낸 것입니다. 이 그림에는 화살표가 4개 있어요. <br>
 **대기가 생김으로 인해 새롭게 추가된 화살표**를 찾아 숫자를 클릭해보세요!
 """)
 
