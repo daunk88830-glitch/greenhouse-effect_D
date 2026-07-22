@@ -18,7 +18,7 @@ st.markdown("""
 <div style="background-color:#3FA34D; color:white; display:inline-block; padding:6px 18px;
             border-radius:20px; font-weight:bold; margin-bottom:8px;">복사 평형</div>
 <p style="font-size:17px; text-align:center; line-height:1.8;">
-<b style="color:#D8443C;">흡수</b>하는 복사 에너지 = <b style="color:#2C6FBB;">방출</b>하는 복사 에너지의 양 <span style="color:#D8443C; font-weight:bold;">같은</span> 상태
+<b style="color:#D8443C;">흡수</b>하는 복사 에너지 = <b style="color:#2C6FBB;">방출</b>하는 복사 에너지의 양 
 </p>
 </div>
 """, unsafe_allow_html=True)
