@@ -12,14 +12,13 @@ st.markdown("""
 <h4 style="margin-top:0;">지구 복사 평형은 어떻게 일어날까?</h4>
 <p style="font-size:16px; line-height:1.7;">
 태양이 방출하는 복사 에너지를 <b>태양 복사 에너지</b>라 하고, <br> 지구가 방출하는 복사 에너지를
-<b>지구 복사 에너지</b>라고 합니다. 지구는 태양 복사 에너지를 흡수하고 지구 복사 에너지를
-방출하면서 <b>복사 평형</b>을 이루고 있습니다.
+<b>지구 복사 에너지</b>라고 합니다. <br> 지구는 태양 복사 에너지를 <b style="color:#D8443C;">흡수</b> 하고 지구 복사 에너지를
+<b style="color:#2C6FBB;">방출</b>하면서 <b>복사 평형</b>을 이루고 있습니다.
 </p>
 <div style="background-color:#3FA34D; color:white; display:inline-block; padding:6px 18px;
             border-radius:20px; font-weight:bold; margin-bottom:8px;">복사 평형</div>
 <p style="font-size:17px; text-align:center; line-height:1.8;">
-흡수하는 복사 에너지와<br>
-방출하는 복사 에너지의 양이 <span style="color:#D8443C; font-weight:bold;">같은</span> 상태
+<b style="color:#D8443C;">흡수</b>하는 복사 에너지 = <b style="color:#2C6FBB;">방출</b>하는 복사 에너지의 양 <span style="color:#D8443C; font-weight:bold;">같은</span> 상태
 </p>
 </div>
 """, unsafe_allow_html=True)
