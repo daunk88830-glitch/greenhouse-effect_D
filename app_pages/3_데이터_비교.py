@@ -81,8 +81,10 @@ with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안�
 **① 기상청 기상자료개방포털 (기온 자료, 추천)**
 1. [data.kma.go.kr](https://data.kma.go.kr) 접속
 2. 상단 메뉴에서 **'기후통계분석' → '기온분석'** (또는 '지상관측자료') 클릭
-3. 원하는 **지점(예: 서울, 부산, 우리 지역)** 과 **기간**을 선택
-4. 조회 결과 화면에서 **'다운로드' 또는 'CSV' 버튼** 클릭
+3. ⚠️ CSV 다운로드에는 **로그인(회원가입)이 필요**해요. 회원가입이 번거롭다면 아래 ④번(Our World in
+   Data)에서도 전 지구 기온 자료를 받을 수 있어요.
+4. 원하는 **지점(예: 서울, 부산, 우리 지역)** 과 **기간**을 선택
+5. 조회 결과 화면에서 **'다운로드' 또는 'CSV' 버튼** 클릭
 
 **② 기상청 온실가스 농도 자료 (CO2 농도, 국내 관측소)**
 1. [data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587](https://data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587) 접속
@@ -104,8 +106,9 @@ with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안�
    **'Data URL (CSV format)'** 옆 복사 아이콘을 눌러 링크를 복사하고, 새 브라우저 탭 주소창에
    붙여넣은 뒤 Enter를 누르세요. 그러면 CSV 파일이 그대로 다운로드됩니다.
 
-**정리하면:** 기온은 ①번, CO2 농도는 ②~④번 중 편한 곳에서 찾으면 돼요. 로그인 없이 바로
-받고 싶다면 ③번이나 ④번을 추천해요. (선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
+**정리하면:** 기온은 ①번(우리 지역 자료, 로그인 필요), CO2 농도는 ②~④번 중 편한 곳에서 찾으면
+돼요. 로그인 없이 바로 받고 싶다면 기온·CO2 모두 **④번(Our World in Data)** 이 가장 간편해요.
+(선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
 구조가 복잡해서 이번 활동에서는 제외했어요. 대신 아래 "선생님이 사용한 그래프"에서 NASA GISTEMP
 자료와 출처를 확인할 수 있습니다.)
 
@@ -296,6 +299,35 @@ def korean_col_label(col, axis_kind):
     return f"{col} (직접 확인 필요)"
 
 
+_ENTITY_KEYWORDS = ["entity", "country", "지역", "국가", "region", "nation"]
+
+
+def filter_to_world_if_mixed(df):
+    """Our World in Data 자료처럼 한 CSV 안에 여러 지역/국가(Entity) 데이터가 연도별로
+    섞여 있는 경우, 그대로 그래프를 그리면 연도 순서가 지역별로 뒤섞여 선이 지그재그로
+    엉키게 된다. 이런 컬럼이 보이면 자동으로 'World'(전 지구) 데이터만 남긴다.
+    반환값: (필터링된 DataFrame, 실제로 필터링이 일어났는지 여부)
+    """
+    entity_col = None
+    for c in df.columns:
+        name = str(c).lower()
+        if any(k in name for k in _ENTITY_KEYWORDS):
+            entity_col = c
+            break
+    if entity_col is None:
+        return df, False
+
+    values = df[entity_col].astype(str).str.strip()
+    world_mask = values.str.lower() == "world"
+    if world_mask.any():
+        return df[world_mask].reset_index(drop=True), True
+
+    # 'World'라는 값이 없다면(예: 국가별 자료만 있는 경우), 가장 먼저 나오는
+    # 지역/국가 하나만 남긴다. 여러 지역이 섞인 채로 그리는 것보다는 안전하다.
+    first_val = values.iloc[0]
+    return df[values == first_val].reset_index(drop=True), True
+
+
 def guess_default_index(cols, axis_kind):
     keywords = {"x": _X_KEYWORDS, "y_co2": _Y_CO2_KEYWORDS, "y_temp": _Y_TEMP_KEYWORDS}.get(axis_kind, [])
     for i, c in enumerate(cols):
@@ -325,6 +357,10 @@ if co2_file is not None or temp_file is not None:
                 "(위 '자료 찾아보기' 안내의 ② NOAA 주의사항 참고)."
             )
         else:
+            co2_student_df, co2_was_filtered = filter_to_world_if_mixed(co2_student_df)
+            if co2_was_filtered:
+                st.caption("ℹ️ 이 자료에는 여러 지역/국가 데이터가 섞여 있어서, 'World'(전 지구, 없으면 첫 번째 지역) "
+                           "데이터만 사용했어요.")
             try:
                 co2_num_cols = co2_student_df.select_dtypes(include="number").columns.tolist()
                 if co2_num_cols:
@@ -350,8 +386,9 @@ if co2_file is not None or temp_file is not None:
                                 format_func=lambda c: korean_col_label(c, "y_co2"),
                                 key="co2_y",
                             )
+                    co2_plot_df = co2_student_df[[co2_x, co2_y]].dropna().sort_values(co2_x)
                     fig_student.add_trace(go.Scatter(
-                        x=co2_student_df[co2_x], y=co2_student_df[co2_y],
+                        x=co2_plot_df[co2_x], y=co2_plot_df[co2_y],
                         name="🔵 CO2 농도", mode="lines+markers",
                         line=dict(color="#3B7FC4", width=3),
                     ))
@@ -368,6 +405,10 @@ if co2_file is not None or temp_file is not None:
                 "기온 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요."
             )
         else:
+            temp_student_df, temp_was_filtered = filter_to_world_if_mixed(temp_student_df)
+            if temp_was_filtered:
+                st.caption("ℹ️ 이 자료에는 여러 지역/국가 데이터가 섞여 있어서, 'World'(전 지구, 없으면 첫 번째 지역) "
+                           "데이터만 사용했어요.")
             try:
                 temp_num_cols = temp_student_df.select_dtypes(include="number").columns.tolist()
                 if temp_num_cols:
@@ -393,8 +434,9 @@ if co2_file is not None or temp_file is not None:
                                 format_func=lambda c: korean_col_label(c, "y_temp"),
                                 key="temp_y",
                             )
+                    temp_plot_df = temp_student_df[[temp_x, temp_y]].dropna().sort_values(temp_x)
                     fig_student.add_trace(go.Scatter(
-                        x=temp_student_df[temp_x], y=temp_student_df[temp_y],
+                        x=temp_plot_df[temp_x], y=temp_plot_df[temp_y],
                         name="🟠 기온", mode="lines+markers",
                         line=dict(color="#E8752C", width=3),
                         yaxis="y2" if both_uploaded and co2_y else "y",
