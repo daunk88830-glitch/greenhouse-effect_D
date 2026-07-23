@@ -1,0 +1,25 @@
+[교사 제공 데이터 출처]
+
+3_데이터_비교.py 페이지의 "선생님이 제시하는 그래프"는 아래 co2_mm_mlo.csv, global_temp_annual.csv
+두 원본 파일을 앱이 실행될 때 직접 읽어 연평균(1958~2025년)으로 계산해서 그립니다.
+(참고: teacher_co2_temperature_1959_2025.csv는 예전 버전에서 같은 방식으로 미리 병합해두었던
+파일로, 현재 페이지 코드에서는 더 이상 사용하지 않지만 참고용으로 data 폴더에 남겨둡니다.)
+
+1. co2_mm_mlo.csv (하와이 마우나로아 관측소 월평균 CO2 농도, 1958.03~2026.05)
+   출처: NOAA Global Monitoring Laboratory (Dr. Xin Lan 등)
+   원자료: https://gml.noaa.gov/ccgg/trends/
+   (NOAA 자료는 미국 정부 저작물로 저작권 보호 대상이 아니며 자유롭게 사용 가능)
+
+2. global_temp_annual.csv (전지구 평균 기온 이상치, GISTEMP)
+   출처: GISTEMP Team, NASA Goddard Institute for Space Studies (GISS)
+   원자료: https://data.giss.nasa.gov/gistemp/
+   (NASA 공개 데이터, 학술/교육 목적 자유 이용 가능)
+
+학생 추천 데이터 링크 (앱의 "자료 찾아보기" 안내에서도 확인 가능):
+- 기상청 기상자료개방포털: https://data.kma.go.kr
+- NOAA 마우나로아 CO2 트렌드: https://gml.noaa.gov/ccgg/trends/
+- NASA GISTEMP: https://data.giss.nasa.gov/gistemp/
+- Our World in Data (CO2 및 온실가스): https://ourworldindata.org/co2-and-greenhouse-gas-emissions
+
+※ co2_mm_mlo.csv와 global_temp_annual.csv 원본 파일도 data 폴더에 함께 포함되어 있어,
+   학생들이 직접 다운로드하여 스스로 그래프를 그려보는 연습에 사용할 수 있습니다.
