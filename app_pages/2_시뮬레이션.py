@@ -70,20 +70,20 @@ def draw_greenhouse(co2_ppm):
         ax.text(x, y, lab, fontsize=6, ha="center", va="center", zorder=4)
 
     ax.annotate("", xy=(3.0, 4.3), xytext=(2.0, 8.6),
-                arrowprops=dict(arrowstyle="-|>", color="#D85A30", lw=3))
-    ax.text(1.7, 6.7, "태양 복사\n에너지", color="#D85A30", fontsize=9, ha="center")
+                arrowprops=dict(arrowstyle="-|>", color="#FFC300", lw=3))
+    ax.text(1.7, 6.7, "태양 복사\n에너지", color="#B8860B", fontsize=9, ha="center")
 
     ax.annotate("", xy=(5.6, 4.3), xytext=(5.3, 2.0),
-                arrowprops=dict(arrowstyle="-|>", color="#993C1D", lw=2.6))
-    ax.text(6.1, 3.2, "지표 방출", color="#993C1D", fontsize=9, ha="center")
+                arrowprops=dict(arrowstyle="-|>", color="#F2994A", lw=2.6))
+    ax.text(6.3, 3.2, "지표 방출\n(지구 복사 에너지)", color="#B15C1D", fontsize=8, ha="center")
 
     ax.annotate("", xy=(4.6, 2.0), xytext=(4.9, 4.3),
-                arrowprops=dict(arrowstyle="-|>", color="#A32D2D", lw=line_width))
-    ax.text(3.4, 3.2, "대기 재복사", color="#791F1F", fontsize=9, ha="center")
+                arrowprops=dict(arrowstyle="-|>", color="#E63946", lw=line_width))
+    ax.text(3.3, 3.2, "대기의 재복사", color="#B01F2C", fontsize=9, ha="center")
 
     ax.annotate("", xy=(7.8, 8.6), xytext=(7.0, 5.7),
-                arrowprops=dict(arrowstyle="-|>", color="#993C1D", lw=2.6))
-    ax.text(8.3, 7.2, "우주로\n방출", color="#993C1D", fontsize=9, ha="center")
+                arrowprops=dict(arrowstyle="-|>", color="#F2994A", lw=2.6))
+    ax.text(8.4, 7.2, "우주로 방출\n(지구 복사 에너지)", color="#B15C1D", fontsize=8, ha="center")
 
     plt.tight_layout()
     return fig
