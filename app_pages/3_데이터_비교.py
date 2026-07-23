@@ -84,21 +84,28 @@ with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안�
 3. 원하는 **지점(예: 서울, 부산, 우리 지역)** 과 **기간**을 선택
 4. 조회 결과 화면에서 **'다운로드' 또는 'CSV' 버튼** 클릭
 
-**② NOAA 마우나로아 CO2 농도 (전 지구 CO2 자료)**
+**② 기상청 온실가스 농도 자료 (CO2 농도, 국내 관측소)**
+1. [data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587](https://data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587) 접속
+2. ⚠️ 이 페이지는 **로그인(회원가입)이 필요**해요. 회원가입이 번거롭다면 아래 ③번이나 ④번을 이용하세요.
+3. 관측 지점(안면도·고산·울릉도독도 중 하나)과 조회 기간을 선택해서 조회
+4. 결과 화면에서 **'CSV 파일 다운로드'** 버튼 클릭
+
+**③ NOAA 마우나로아 CO2 농도 (전 지구 CO2 자료, 로그인 불필요)**
 1. [gml.noaa.gov/ccgg/trends](https://gml.noaa.gov/ccgg/trends) 접속
 2. 화면의 **'Data' 탭**에서 Monthly 또는 Annual CSV/TXT 파일 링크 클릭 → 다운로드
 3. ⚠️ 이 파일은 맨 위에 `#`으로 시작하는 설명 줄이 여러 개 들어있을 수 있어요. 업로드했을 때 오류가
    나면, 메모장/엑셀로 열어서 `#`으로 시작하는 줄들을 지우고 진짜 표 형태(첫 줄이 컬럼 이름)만
    남긴 뒤 다시 저장해서 올려보세요.
 
-**③ Our World in Data (전 세계 CO2 자료)**
+**④ Our World in Data (전 세계 CO2·기온 자료, 가장 쉬움)**
 1. [ourworldindata.org/co2-and-greenhouse-gas-emissions](https://ourworldindata.org/co2-and-greenhouse-gas-emissions) 접속
 2. 원하는 그래프 아래 **'Download' 버튼**이 보이면 클릭해서 CSV 다운로드
 3. 'Download' 버튼 대신 **'Data API'라는 회색 박스**가 보인다면, 그 안의
    **'Data URL (CSV format)'** 옆 복사 아이콘을 눌러 링크를 복사하고, 새 브라우저 탭 주소창에
    붙여넣은 뒤 Enter를 누르세요. 그러면 CSV 파일이 그대로 다운로드됩니다.
 
-**기온 자료는 ①번 기상청 자료를 추천해요.** (선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
+**정리하면:** 기온은 ①번, CO2 농도는 ②~④번 중 편한 곳에서 찾으면 돼요. 로그인 없이 바로
+받고 싶다면 ③번이나 ④번을 추천해요. (선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
 구조가 복잡해서 이번 활동에서는 제외했어요. 대신 아래 "선생님이 사용한 그래프"에서 NASA GISTEMP
 자료와 출처를 확인할 수 있습니다.)
 
