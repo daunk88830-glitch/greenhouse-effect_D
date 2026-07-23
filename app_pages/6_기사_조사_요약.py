@@ -31,3 +31,47 @@ if st.session_state.articles:
         st.markdown(f"**{i}. {article['link']}**")
         st.write(article["summary"])
         st.markdown("---")
+
+st.divider()
+
+# ---------------------------------------------------------
+# 나 / 국가 / 전 지구 관점에서 할 수 있는 일 생각해보기
+# ---------------------------------------------------------
+st.subheader("🌏 지구온난화 피해를 줄이기 위해 할 수 있는 일")
+st.markdown("찾아본 기사를 바탕으로, 지구온난화의 피해를 줄이기 위해 **나·국가·전 지구** 관점에서 "
+            "각각 할 수 있는 일은 무엇인지 생각해서 적어보자.")
+
+action_me = st.text_area(
+    "🙋 나 (개인) 차원에서 할 수 있는 일",
+    placeholder="예: 대중교통을 이용하고, 사용하지 않는 전자기기의 전원을 꺼둔다.",
+    height=80, key="action_me",
+)
+action_nation = st.text_area(
+    "🏛️ 국가 차원에서 할 수 있는 일",
+    placeholder="예: 재생에너지 발전 비중을 늘리고, 탄소 배출 규제를 강화한다.",
+    height=80, key="action_nation",
+)
+action_global = st.text_area(
+    "🌍 전 지구 차원에서 할 수 있는 일",
+    placeholder="예: 국제 협약(파리협정 등)을 통해 국가 간 온실가스 감축 목표를 함께 지키고 협력한다.",
+    height=80, key="action_global",
+)
+
+if st.button("제출하기", key="actions_submit"):
+    filled = [bool(action_me.strip()), bool(action_nation.strip()), bool(action_global.strip())]
+    if not any(filled):
+        st.warning("나·국가·전 지구 중 최소 한 가지 관점에서라도 적어주세요.")
+    elif all(filled):
+        st.success("나·국가·전 지구, 세 관점을 모두 생각해봤네요! 개인의 실천부터 국제 협력까지 "
+                   "다양한 층위에서 대응이 필요하다는 걸 잘 이해했어요. 👏")
+        st.balloons()
+    else:
+        missing = []
+        if not filled[0]:
+            missing.append("나(개인)")
+        if not filled[1]:
+            missing.append("국가")
+        if not filled[2]:
+            missing.append("전 지구")
+        st.info("좋은 시작이에요! " + ", ".join(missing) + " 관점에서도 할 수 있는 일을 생각해서 "
+                "채워보면 더 풍부한 답이 될 거예요.")
