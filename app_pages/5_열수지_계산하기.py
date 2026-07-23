@@ -102,22 +102,24 @@ st.divider()
 st.subheader("2️⃣ 대기 중 이산화 탄소 농도가 증가하면 지구 열수지가 어떻게 변동되는지 표시해 보자")
 st.markdown("위 그림을 다시 참고하면서, 대기 중 CO2가 늘어났을 때 각 에너지양이 **어떻게 변할지** 골라보세요.")
 
-step1 = st.radio(
-    "① 대기가 흡수하는 에너지양이 132보다?",
-    ["선택해주세요", "증가한다", "변화없다", "감소한다"], key="step1",
-)
-step2 = st.radio(
-    "② 대기가 지표로 방출(재복사)하는 에너지양이 94보다?",
-    ["선택해주세요", "증가한다", "변화없다", "감소한다"], key="step2",
-)
-step3 = st.radio(
-    "③ 지표가 다시 흡수하는 에너지양이 94보다?",
-    ["선택해주세요", "증가한다", "변화없다", "감소한다"], key="step3",
-)
-step4 = st.radio(
-    "④ 지표 온도는?",
-    ["선택해주세요", "상승한다", "변화없다", "하강한다"], key="step4",
-)
+
+def radio_row(question, options, key):
+    """문항 글자를 본문 크기로 키우고, 문항과 선택지를 한 줄에 가로로 배치한다."""
+    q_col, opt_col = st.columns([1.5, 1.6])
+    with q_col:
+        st.markdown(f"<p style='font-size:17px; margin-top:8px;'>{question}</p>", unsafe_allow_html=True)
+    with opt_col:
+        return st.radio(question, options, key=key, horizontal=True, label_visibility="collapsed")
+
+
+step1 = radio_row("① 대기가 흡수하는 에너지양이 132보다?",
+                   ["선택해주세요", "증가한다", "변화없다", "감소한다"], "step1")
+step2 = radio_row("② 대기가 지표로 방출(재복사)하는 에너지양이 94보다?",
+                   ["선택해주세요", "증가한다", "변화없다", "감소한다"], "step2")
+step3 = radio_row("③ 지표가 다시 흡수하는 에너지양이 94보다?",
+                   ["선택해주세요", "증가한다", "변화없다", "감소한다"], "step3")
+step4 = radio_row("④ 지표 온도는?",
+                   ["선택해주세요", "상승한다", "변화없다", "하강한다"], "step4")
 
 if st.button("정답 확인", key="check2"):
     if "선택해주세요" in (step1, step2, step3, step4):
