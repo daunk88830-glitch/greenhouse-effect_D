@@ -5,14 +5,28 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import plotly.graph_objects as go
+import os
 
-# 한글 폰트 등록 (서버 환경에 상관없이 한글이 깨지지 않도록)
-try:
-    _font_path = "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
-    fm.fontManager.ttflist.insert(0, fm.FontEntry(fname=_font_path, name="NotoSansKR"))
-    plt.rcParams["font.family"] = "NotoSansKR"
-except Exception:
-    pass
+# 한글 폰트 등록: 배포 서버(Streamlit Cloud)에는 packages.txt로 설치한
+# 나눔고딕 폰트가 아래 경로에 깔리므로, 그 파일을 직접 찾아서 등록합니다.
+# (서버마다 폰트 설치 위치가 다를 수 있어 여러 경로를 순서대로 확인합니다)
+_FONT_CANDIDATES = [
+    "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+]
+
+_font_name = "DejaVu Sans"
+for _path in _FONT_CANDIDATES:
+    if os.path.exists(_path):
+        try:
+            fm.fontManager.addfont(_path)
+            _font_name = fm.FontProperties(fname=_path).get_name()
+            break
+        except Exception:
+            continue
+
+plt.rcParams["font.family"] = _font_name
 plt.rcParams["axes.unicode_minus"] = False
 
 st.title("🎛️ 1차시 - ② 시뮬레이션 체험")
