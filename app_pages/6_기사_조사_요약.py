@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("📰 2차시 - ③ 기사 조사 요약")
+st.title("📰 2차시 - ③ 기사 조사 및 요약")
 st.caption("지구온난화로 나타날 수 있는 자연환경·인간생활의 변화에 대한 기사를 찾아 요약해보세요.")
 
 st.markdown("""
