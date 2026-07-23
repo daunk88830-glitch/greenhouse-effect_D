@@ -48,7 +48,7 @@ with img_col2:
     st.image(
         "assets/textbook_co2_temp_graph.png",
         caption="출처: 기상청 종합기후변화감시정보",
-        width=480,
+        width=620,
     )
 
 st.markdown(
@@ -105,8 +105,7 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("① CSV 업로드 및 출처 · 선택 이유 입력")
 st.markdown(
-    "선생님도 **CO2 농도 자료**와 **기온 자료**, 이렇게 2개의 파일을 따로 준비했었죠? "
-    "여러분도 두 변수(이산화 탄소 농도, 기온)에 대한 자료를 각각 찾아서 올려보세요. "
+    "위 그래프와 같이 **CO2 농도 자료**와 **기온 자료**, 이렇게 2개의 자료를 각각 찾아서 올려보세요. "
     "(아직 하나만 찾았다면 하나만 올려도 괜찮아요.)"
 )
 
@@ -143,6 +142,38 @@ def read_csv_safe(f):
         return pd.read_csv(f, encoding="cp949")
 
 
+# 학생들이 기상청/NOAA/GISTEMP/Our World in Data 등에서 흔히 받게 되는 컬럼명을
+# 영어를 몰라도 고를 수 있도록 한글 라벨로 바꿔서 보여준다.
+_X_KEYWORDS = ["year", "연도", "년도", "date", "날짜", "decimal", "time", "월", "month", "일시", "시각"]
+_Y_CO2_KEYWORDS = ["co2", "ppm", "농도", "concentration", "average", "interpolated", "trend"]
+_Y_TEMP_KEYWORDS = ["temp", "기온", "anomaly", "편차", "온도"]
+
+
+def korean_col_label(col, axis_kind):
+    """axis_kind: 'x' (연도/날짜) / 'y_co2' (CO2 농도) / 'y_temp' (기온)"""
+    name = str(col).lower()
+    if axis_kind == "x" and any(k in name for k in _X_KEYWORDS):
+        return f"📅 연도/날짜 (원본 컬럼명: {col})"
+    if axis_kind == "y_co2" and any(k in name for k in _Y_CO2_KEYWORDS):
+        return f"🔵 CO2 농도 (원본 컬럼명: {col})"
+    if axis_kind == "y_temp" and any(k in name for k in _Y_TEMP_KEYWORDS):
+        return f"🟠 기온 (원본 컬럼명: {col})"
+    return f"{col} (직접 확인 필요)"
+
+
+def guess_default_index(cols, axis_kind):
+    keywords = {"x": _X_KEYWORDS, "y_co2": _Y_CO2_KEYWORDS, "y_temp": _Y_TEMP_KEYWORDS}.get(axis_kind, [])
+    for i, c in enumerate(cols):
+        if any(k in str(c).lower() for k in keywords):
+            return i
+    if axis_kind in ("y_co2", "y_temp"):
+        # 값 컬럼 키워드와 매칭되지 않으면, 최소한 연도/날짜로 보이는 컬럼은 피해서 고른다.
+        for i, c in enumerate(cols):
+            if not any(k in str(c).lower() for k in _X_KEYWORDS):
+                return i
+    return 0
+
+
 st.subheader("📈 내가 찾은 자료로 그래프 그려보기")
 if co2_file is not None or temp_file is not None:
     fig_student = go.Figure()
@@ -153,14 +184,25 @@ if co2_file is not None or temp_file is not None:
         co2_student_df = read_csv_safe(co2_file)
         co2_num_cols = co2_student_df.select_dtypes(include="number").columns.tolist()
         if co2_num_cols:
+            co2_x_options = co2_student_df.columns.tolist()
             cc1, cc2 = st.columns(2)
             with cc1:
-                co2_x = st.selectbox("CO2 자료 - X축(연도/날짜) 컬럼", co2_student_df.columns.tolist(), key="co2_x")
+                co2_x = st.selectbox(
+                    "CO2 자료 - 가로축(연도/날짜) 선택", co2_x_options,
+                    index=guess_default_index(co2_x_options, "x"),
+                    format_func=lambda c: korean_col_label(c, "x"),
+                    key="co2_x",
+                )
             with cc2:
-                co2_y = st.selectbox("CO2 자료 - Y축(농도) 컬럼", co2_num_cols, key="co2_y")
+                co2_y = st.selectbox(
+                    "CO2 자료 - 세로축(CO2 농도) 선택", co2_num_cols,
+                    index=guess_default_index(co2_num_cols, "y_co2"),
+                    format_func=lambda c: korean_col_label(c, "y_co2"),
+                    key="co2_y",
+                )
             fig_student.add_trace(go.Scatter(
                 x=co2_student_df[co2_x], y=co2_student_df[co2_y],
-                name=f"CO2: {co2_y}", mode="lines+markers",
+                name="🔵 CO2 농도", mode="lines+markers",
                 line=dict(color="#3B7FC4", width=3),
             ))
         else:
@@ -171,14 +213,25 @@ if co2_file is not None or temp_file is not None:
         temp_student_df = read_csv_safe(temp_file)
         temp_num_cols = temp_student_df.select_dtypes(include="number").columns.tolist()
         if temp_num_cols:
+            temp_x_options = temp_student_df.columns.tolist()
             tc1, tc2 = st.columns(2)
             with tc1:
-                temp_x = st.selectbox("기온 자료 - X축(연도/날짜) 컬럼", temp_student_df.columns.tolist(), key="temp_x")
+                temp_x = st.selectbox(
+                    "기온 자료 - 가로축(연도/날짜) 선택", temp_x_options,
+                    index=guess_default_index(temp_x_options, "x"),
+                    format_func=lambda c: korean_col_label(c, "x"),
+                    key="temp_x",
+                )
             with tc2:
-                temp_y = st.selectbox("기온 자료 - Y축(기온) 컬럼", temp_num_cols, key="temp_y")
+                temp_y = st.selectbox(
+                    "기온 자료 - 세로축(기온) 선택", temp_num_cols,
+                    index=guess_default_index(temp_num_cols, "y_temp"),
+                    format_func=lambda c: korean_col_label(c, "y_temp"),
+                    key="temp_y",
+                )
             fig_student.add_trace(go.Scatter(
                 x=temp_student_df[temp_x], y=temp_student_df[temp_y],
-                name=f"기온: {temp_y}", mode="lines+markers",
+                name="🟠 기온", mode="lines+markers",
                 line=dict(color="#E8752C", width=3),
                 yaxis="y2" if both_uploaded and co2_y else "y",
             ))
@@ -187,15 +240,19 @@ if co2_file is not None or temp_file is not None:
             st.dataframe(temp_student_df.head())
 
     if co2_y or temp_y:
+        st.markdown("**📊 내가 찾은 자료로 그린 그래프**")
         layout_kwargs = dict(
-            title="내가 찾은 자료로 그린 그래프",
             height=420,
-            margin=dict(l=10, r=10, t=50, b=10),
-            legend=dict(orientation="h", y=1.15),
+            margin=dict(l=10, r=10, t=20, b=70),
+            legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5),
         )
         if both_uploaded and co2_y and temp_y:
-            layout_kwargs["yaxis"] = dict(title="CO2 농도")
-            layout_kwargs["yaxis2"] = dict(title="기온", overlaying="y", side="right")
+            layout_kwargs["yaxis"] = dict(title="🔵 CO2 농도")
+            layout_kwargs["yaxis2"] = dict(title="🟠 기온", overlaying="y", side="right")
+        elif co2_y:
+            layout_kwargs["yaxis"] = dict(title="🔵 CO2 농도")
+        elif temp_y:
+            layout_kwargs["yaxis"] = dict(title="🟠 기온")
         fig_student.update_layout(**layout_kwargs)
         st.plotly_chart(fig_student, use_container_width=True)
 
@@ -224,26 +281,28 @@ st.markdown(
 
 with st.expander("👀 선생님이 사용한 그래프 확인하기 (클릭해서 펼치기)"):
     if teacher_df is not None:
+        st.markdown(
+            f"**📊 연도별 CO2 농도 및 기온 이상치 ({teacher_df['Year'].min()}~{teacher_df['Year'].max()}, 실제 관측)**"
+        )
         fig_teacher = go.Figure()
         fig_teacher.add_trace(go.Scatter(
             x=teacher_df["Year"], y=teacher_df["Temp_Anomaly_C"],
-            name="기온 편차 (℃)", mode="lines",
+            name="🟠 기온 편차 (℃)", mode="lines",
             line=dict(color="#E8752C", width=3),
         ))
         fig_teacher.add_trace(go.Scatter(
             x=teacher_df["Year"], y=teacher_df["CO2_ppm"],
-            name="CO2 농도 (ppm)", mode="lines",
+            name="🔵 CO2 농도 (ppm)", mode="lines",
             line=dict(color="#3B7FC4", width=3),
             yaxis="y2",
         ))
         fig_teacher.update_layout(
-            title=f"연도별 CO2 농도 및 기온 이상치 ({teacher_df['Year'].min()}~{teacher_df['Year'].max()}, 실제 관측)",
             xaxis_title="연도(년)",
-            yaxis=dict(title="기온 편차 (℃)"),
-            yaxis2=dict(title="CO2 농도 (ppm)", overlaying="y", side="right"),
-            legend=dict(orientation="h", y=1.15),
+            yaxis=dict(title="🟠 기온 편차 (℃)"),
+            yaxis2=dict(title="🔵 CO2 농도 (ppm)", overlaying="y", side="right"),
+            legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5),
             height=460,
-            margin=dict(l=10, r=10, t=60, b=10),
+            margin=dict(l=10, r=10, t=20, b=80),
         )
         st.plotly_chart(fig_teacher, use_container_width=True)
         st.caption(
