@@ -113,3 +113,31 @@ if st.button("제출하기", key="obs_submit"):
         with st.expander("💡 예시 답안과 비교해보기"):
             st.write("이산화 탄소가 있으면 온실효과 때문에 기온이 상승한다.")
             st.caption("내가 쓴 답과 비교해보고, 빠진 내용이 있다면 스스로 보완해보세요.")
+
+        st.markdown("##### 🔍 나의 예측과 일치하는지 알아봅시다!")
+        prediction_text = (prediction or "").strip()
+        if not prediction_text:
+            st.warning("앞에서 '실험 전 예측해보기'에 답을 적지 않았어요. 위로 올라가서 먼저 예측을 적어보면 "
+                       "예측과 관찰 결과를 비교해볼 수 있어요.")
+        else:
+            predicted_b_higher = ("b" in prediction_text.lower()) or ("페트병 b" in prediction_text) or \
+                                  ("이산화" in prediction_text and "높" in prediction_text)
+            observed_b_higher = has_greenhouse and has_temp
+
+            st.caption(f"내가 적은 예측: “{prediction_text}”")
+
+            if predicted_b_higher and observed_b_higher:
+                st.success(
+                    "나의 예측과 실험 관찰 결과가 일치해요! 이산화 탄소(B)가 있을 때 온실효과로 기온이 "
+                    "더 크게 상승한다는 예측이 실험으로도 확인되었네요. 👏"
+                )
+            elif predicted_b_higher and not observed_b_higher:
+                st.info(
+                    "예측은 맞는 방향이었어요! 다만 위 '관찰 및 해석' 답변에는 온실효과·이산화 탄소와 "
+                    "기온 상승의 연결이 조금 더 드러나면 좋겠어요. 예측과 관찰을 같은 표현으로 정리해볼까요?"
+                )
+            else:
+                st.info(
+                    "예측했던 내용과 실제 관찰 결과를 다시 한번 비교해보세요. 페트병 B(CO2 있음)의 온도가 "
+                    "더 높이 올라간 것과 나의 처음 예측이 같은 방향인지 확인해보면 좋겠어요."
+                )

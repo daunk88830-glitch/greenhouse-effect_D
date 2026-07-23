@@ -1,4 +1,5 @@
 import io
+from collections import Counter
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -137,13 +138,101 @@ student_reason = st.text_area(
     "이 지역·기간의 자료를 선택한 이유를 적어주세요.",
     placeholder="예: 내가 사는 지역의 최근 10년간 기온 변화가 궁금해서 서울 지점, 2014~2023년 자료를 선택했다.",
     height=80,
+    key="student_reason",
 )
+
+if st.button("제출하기", key="student_reason_submit"):
+    reason_text = student_reason.strip()
+    if not reason_text:
+        st.warning("자료를 선택한 이유를 적어주세요.")
+    else:
+        reason_keywords = ["왜냐하면", "때문", "궁금", "싶어서", "싶다", "알아보고"]
+        place_time_keywords = ["지역", "지점", "년", "월", "기간", "최근", "동안"]
+        has_reason = any(k in reason_text for k in reason_keywords)
+        has_place_time = any(k in reason_text for k in place_time_keywords)
+
+        if len(reason_text) < 10:
+            st.info(
+                "좋은 시작이에요! **어떤 지역·기간**의 자료를 골랐는지, **왜** 그 자료를 골랐는지 "
+                "조금 더 자세히 적어볼까요?"
+            )
+        elif has_reason and has_place_time:
+            st.success(
+                "이유가 아주 명확해요! 지역·기간을 구체적으로 선택하고, 그 이유까지 잘 설명했어요. 👏"
+            )
+        elif has_place_time:
+            st.success(
+                "어떤 지역·기간의 자료인지 잘 설명했어요! 왜 그 자료가 궁금했는지 이유도 한 문장 덧붙이면 더 좋아져요."
+            )
+        else:
+            st.info(
+                "이유를 잘 적었어요! 다음엔 **어떤 지역·기간**의 자료를 선택했는지도 함께 적어보면 "
+                "더 명확한 기록이 될 거예요."
+            )
+
+
+def _decode_bytes(raw):
+    """기상청(cp949/euc-kr)·NOAA(utf-8) 등 출처마다 다른 인코딩을 순서대로 시도해서 디코딩한다."""
+    for enc in ("utf-8", "cp949", "euc-kr"):
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("utf-8", errors="ignore")
+
+
+def _smart_table_extract(text):
+    """기상청 자료처럼 파일 맨 위에 '[검색조건]', '자료구분 : 년' 같은 안내 문구가 여러 줄
+    섞여 있는 경우, 실제 표(헤더+데이터)가 시작하는 지점을 자동으로 찾아서 읽는다.
+    (콤마로 구분된 필드 수가 가장 많이 반복되는 지점을 '진짜 표'로 판단)
+    """
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip() and not ln.strip().startswith("#")]
+    if len(lines) < 2:
+        return None
+
+    def field_count(ln):
+        return len(ln.split(","))
+
+    counts = [field_count(ln) for ln in lines]
+    candidate_counts = [c for c in counts if c >= 2]
+    if not candidate_counts:
+        return None
+    mode_width = Counter(candidate_counts).most_common(1)[0][0]
+    start_idx = next(i for i, c in enumerate(counts) if c == mode_width)
+    table_lines = lines[start_idx:]
+    if len(table_lines) < 2:
+        return None
+
+    def looks_numeric_row(ln):
+        fields = [f.strip().strip('"') for f in ln.split(",")]
+        numeric = 0
+        for f in fields:
+            try:
+                float(f)
+                numeric += 1
+            except ValueError:
+                pass
+        return numeric >= max(1, len(fields) // 2)
+
+    first_row_is_data = looks_numeric_row(table_lines[0])
+    buf = io.StringIO("\n".join(table_lines))
+    try:
+        if first_row_is_data:
+            df = pd.read_csv(buf, header=None, on_bad_lines="skip")
+            df.columns = [f"컬럼{i + 1}" for i in range(df.shape[1])]
+        else:
+            df = pd.read_csv(buf, header=0, on_bad_lines="skip")
+    except Exception:
+        return None
+    if df.shape[1] < 2 or len(df) == 0:
+        return None
+    return df
 
 
 def read_csv_safe(f):
-    """여러 인코딩·구분자·주석 형식을 순서대로 시도해서 최대한 안전하게 CSV를 읽는다.
-    (NOAA 원자료처럼 맨 위에 #으로 시작하는 설명 줄이 섞여 있거나, 구분자가 다르거나,
-    줄마다 컬럼 수가 안 맞는 경우에도 최대한 읽어보려고 시도한다.)
+    """여러 인코딩·주석 형식을 순서대로 시도해서 최대한 안전하게 CSV를 읽는다.
+    (기상청 자료처럼 맨 위에 안내 문구가 여러 줄 섞여 있거나 cp949로 인코딩된 경우,
+    NOAA 자료처럼 '#' 설명 줄이 섞여 있거나 헤더·데이터 컬럼 수가 어긋난 경우 모두 시도한다.)
     반환값: (DataFrame 또는 None, 오류 또는 None)
     """
     attempts = [
@@ -167,20 +256,14 @@ def read_csv_safe(f):
             last_err = e
             continue
 
-    # 마지막 수단: 실제 NOAA 자료처럼 '#' 설명 줄 + 헤더와 데이터의 컬럼 수가 어긋난 경우.
-    # 주석 줄과 (컬럼 수가 다른) 헤더 줄을 통째로 버리고, 실제 데이터 줄의 컬럼 수를 기준으로
-    # 다시 읽는다. 컬럼 이름은 "컬럼1, 컬럼2 ..."로 대체되지만, 최소한 그래프는 그릴 수 있다.
+    # 마지막 수단: 안내 문구·주석 줄을 건너뛰고 실제 표가 시작하는 지점을 스스로 찾아서 읽는다.
     try:
         f.seek(0)
         raw = f.read()
-        text = raw.decode("utf-8", errors="ignore") if isinstance(raw, bytes) else raw
-        lines = [ln for ln in text.splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
-        if len(lines) >= 3:
-            data_lines = lines[1:]  # 첫 줄(헤더로 추정)은 버리고 데이터 줄만 사용
-            df = pd.read_csv(io.StringIO("\n".join(data_lines)), header=None, on_bad_lines="skip")
-            if df.shape[1] >= 2 and len(df) > 0:
-                df.columns = [f"컬럼{i + 1}" for i in range(df.shape[1])]
-                return df, None
+        text = _decode_bytes(raw) if isinstance(raw, bytes) else raw
+        df = _smart_table_extract(text)
+        if df is not None:
+            return df, None
     except Exception as e:
         last_err = e
 
@@ -189,7 +272,7 @@ def read_csv_safe(f):
 
 # 학생들이 기상청/NOAA/GISTEMP/Our World in Data 등에서 흔히 받게 되는 컬럼명을
 # 영어를 몰라도 고를 수 있도록 한글 라벨로 바꿔서 보여준다.
-_X_KEYWORDS = ["year", "연도", "년도", "date", "날짜", "decimal", "time", "월", "month", "일시", "시각"]
+_X_KEYWORDS = ["year", "연도", "년도", "년", "date", "날짜", "decimal", "time", "월", "month", "일시", "시각"]
 _Y_CO2_KEYWORDS = ["co2", "ppm", "농도", "concentration", "average", "interpolated", "trend"]
 _Y_TEMP_KEYWORDS = ["temp", "기온", "anomaly", "편차", "온도"]
 
