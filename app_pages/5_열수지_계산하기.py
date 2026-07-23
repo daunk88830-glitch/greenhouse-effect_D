@@ -3,37 +3,62 @@ import streamlit as st
 st.title("🧮 2차시 - ② 지구 열수지 계산하기")
 st.caption("교과서 자료(『대기과학』, 2016.)의 지구 열수지 평형 그림을 보고 두 가지 문제를 풀어봅시다.")
 
-st.image(
-    "assets/textbook_heat_budget_diagram_only.png",
-    caption="지구의 열수지 평형 (출처: 『대기과학』, 2016.)",
-    use_container_width=True,
-)
 
-st.divider()
+def parse_int(s):
+    """text_input에 입력된 문자열을 정수로 바꿔본다. 숫자가 아니면 None을 반환한다."""
+    try:
+        return int(str(s).strip())
+    except (TypeError, ValueError):
+        return None
+
 
 # ---------------------------------------------------------
 # 1) 지표·대기·우주로 구분해서 유입·유출 에너지양 비교하기
 # ---------------------------------------------------------
-st.subheader("1️⃣ 지표·대기·우주로 구분하여 유입·유출 에너지양을 비교해 보자")
-st.markdown("""
-위 그림의 화살표에 적힌 숫자들을 이용해서, **지표 / 대기 / 우주**로 구분했을 때
-각각 **유입되는 에너지양**과 **유출되는 에너지양**을 계산해보세요.
-(힌트: 지표는 태양 복사로 받는 에너지와 대기에서 되돌아오는 에너지를 모두 더해서 유입량을 구해요.)
+col_img, col_input = st.columns([1, 1.3])
+
+with col_img:
+    st.image(
+        "assets/textbook_heat_budget_diagram_only.png",
+        caption="지구의 열수지 평형 (출처: 『대기과학』, 2016.)",
+        width=380,
+    )
+
+with col_input:
+    st.subheader("1️⃣ 유입·유출 에너지양 비교하기")
+    st.markdown("""
+지표·대기·우주로 구분하여, 각각 **유입되는 에너지양**과 **유출되는 에너지양**을
+비교해 보자.
+
+왼쪽 그림 속 화살표 숫자들을 더하고 빼서 계산해보세요.
+
+💡 **힌트 1**: 지표는 태양 복사로 받는 에너지와 대기에서 되돌아오는 에너지를 모두
+더해서 유입량을 구해요.
+
+💡 **힌트 2**: 지구는 복사 평형을 이루므로, 지표·대기·우주 **각각도** 유입되는
+에너지양과 유출되는 에너지양이 서로 같아요.
 """)
 
-col_s, col_a, col_u = st.columns(3)
-with col_s:
     st.markdown("**지표**")
-    surface_in = st.number_input("유입되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="surface_in")
-    surface_out = st.number_input("유출되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="surface_out")
-with col_a:
+    sc1, sc2 = st.columns(2)
+    with sc1:
+        surface_in = st.text_input("유입 에너지양", key="surface_in", placeholder="예: 144")
+    with sc2:
+        surface_out = st.text_input("유출 에너지양", key="surface_out", placeholder="예: 144")
+
     st.markdown("**대기**")
-    atmos_in = st.number_input("유입되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="atmos_in")
-    atmos_out = st.number_input("유출되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="atmos_out")
-with col_u:
+    ac1, ac2 = st.columns(2)
+    with ac1:
+        atmos_in = st.text_input("유입 에너지양", key="atmos_in", placeholder="예: 152")
+    with ac2:
+        atmos_out = st.text_input("유출 에너지양", key="atmos_out", placeholder="예: 152")
+
     st.markdown("**우주**")
-    space_in = st.number_input("유입되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="space_in")
-    space_out = st.number_input("유출되는 에너지양", min_value=0, max_value=300, value=0, step=1, key="space_out")
+    uc1, uc2 = st.columns(2)
+    with uc1:
+        space_in = st.text_input("유입 에너지양", key="space_in", placeholder="예: 100")
+    with uc2:
+        space_out = st.text_input("유출 에너지양", key="space_out", placeholder="예: 100")
 
 if st.button("정답 확인", key="check1"):
     answers = [
@@ -46,10 +71,14 @@ if st.button("정답 확인", key="check1"):
     ]
     all_correct = True
     for name, student_val, correct_val in answers:
-        if student_val == correct_val:
-            st.success(f"{name}: {student_val} 정답입니다!")
+        parsed = parse_int(student_val)
+        if parsed is None:
+            st.warning(f"{name}: 숫자로 입력해주세요.")
+            all_correct = False
+        elif parsed == correct_val:
+            st.success(f"{name}: {parsed} 정답입니다!")
         else:
-            st.error(f"{name}: {student_val} → 다시 계산해보세요.")
+            st.error(f"{name}: {parsed} → 다시 계산해보세요.")
             all_correct = False
 
     if all_correct:
@@ -71,7 +100,7 @@ st.divider()
 # 2) 이산화 탄소 농도가 증가하면 지구 열수지가 어떻게 변동될까?
 # ---------------------------------------------------------
 st.subheader("2️⃣ 대기 중 이산화 탄소 농도가 증가하면 지구 열수지가 어떻게 변동되는지 표시해 보자")
-st.markdown("아래 순서대로, 대기 중 CO2가 늘어났을 때 각 에너지양이 **어떻게 변할지** 골라보세요.")
+st.markdown("위 그림을 다시 참고하면서, 대기 중 CO2가 늘어났을 때 각 에너지양이 **어떻게 변할지** 골라보세요.")
 
 step1 = st.radio(
     "① 대기가 흡수하는 에너지양이 132보다?",
@@ -108,3 +137,44 @@ if st.button("정답 확인", key="check2"):
             "대기가 지표로 재복사하는 에너지양 **증가**(94보다) → 지표가 다시 흡수하는 에너지양 **증가**"
             "(94보다) → 지표 온도 **상승**. 이것이 온실효과가 강화되어 지구 온난화가 일어나는 원리예요."
         )
+
+st.divider()
+
+# ---------------------------------------------------------
+# 3) 형성평가 — 교과서와는 다른 수치로 직접 계산해보기 (빈칸 1개)
+# ---------------------------------------------------------
+st.subheader("✅ 형성평가 — 다른 수치로 직접 계산해보기")
+st.markdown("""
+이번에는 (교과서 예시와는 다른) **가상의 행성**의 열수지 값으로 연습해봅시다.
+아래 값들을 보고, 빈칸 하나(**대기가 우주로 방출하는 에너지양**)를 직접 계산해서 적어보세요.
+""")
+
+st.markdown("""
+| 구분 | 에너지양 |
+|---|---|
+| 태양 복사 (유입) | 100 |
+| 반사 (우주로) | 24 |
+| 대기가 흡수하는 태양 복사 | 16 |
+| 지표가 흡수하는 태양 복사 | 60 |
+| 지표 복사 중 대기가 흡수하는 양 (지표 → 대기) | 140 |
+| 대기가 지표로 재복사하는 양 (대기 → 지표) | 88 |
+| 지표가 우주로 직접 방출하는 양 (지표 → 우주) | 8 |
+| **대기가 우주로 방출하는 양 (대기 → 우주)** | **?** |
+""")
+
+st.caption("💡 힌트: 대기도 지표·우주와 마찬가지로 열수지 평형을 이룹니다. "
+           "대기에 **유입**되는 에너지양(대기 흡수 + 지표에서 오는 양)과 "
+           "대기에서 **유출**되는 에너지양(지표로 재복사 + 우주로 방출)이 같아야 해요.")
+
+quiz_answer = st.text_input("대기가 우주로 방출하는 에너지양은?", key="formative_quiz", placeholder="숫자만 입력")
+
+if st.button("정답 확인", key="check_formative"):
+    parsed = parse_int(quiz_answer)
+    if parsed is None:
+        st.warning("숫자로 입력해주세요.")
+    elif parsed == 68:
+        st.success("정답입니다! 68이에요. 대기 유입(16+140=156) = 대기 유출(88+68=156)로 평형을 이뤄요. 👏")
+        st.balloons()
+    else:
+        st.error(f"{parsed} → 다시 계산해보세요. 대기의 유입 에너지양(16+140)과 유출 에너지양(88+□)이 "
+                 "같아지도록 □를 구해보세요.")
