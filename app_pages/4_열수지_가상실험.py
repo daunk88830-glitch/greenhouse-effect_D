@@ -88,4 +88,28 @@ else:
 
 st.divider()
 st.subheader("✍️ 관찰 및 해석")
-obs = st.text_area("두 페트병의 온도 변화 차이로 알 수 있는 것을 설명해보세요.", height=100)
+obs = st.text_area("두 페트병의 온도 변화 차이로 알 수 있는 것을 설명해보세요.", height=100, key="obs")
+
+if st.button("제출하기", key="obs_submit"):
+    text = obs.strip()
+    if not text:
+        st.warning("관찰한 내용을 적어주세요.")
+    else:
+        greenhouse_keywords = ["온실", "이산화 탄소", "이산화탄소", "co2"]
+        temp_keywords = ["기온", "온도", "상승", "높"]
+        has_greenhouse = any(k in text.lower() for k in greenhouse_keywords)
+        has_temp = any(k in text for k in temp_keywords)
+
+        if has_greenhouse and has_temp:
+            st.success(
+                "정확해요! 이산화 탄소(온실 기체)가 있으면 온실효과가 강화되어 기온이 더 크게 "
+                "상승한다는 핵심을 잘 짚었어요. 👏"
+            )
+        elif has_greenhouse or has_temp:
+            st.info("좋은 방향이에요! '온실효과'와 '기온 상승'을 연결지어서 한 문장으로 더 정리해볼까요?")
+        else:
+            st.warning("페트병 B(CO2 있음)가 더 높은 온도까지 올라간 이유를 온실효과와 연결지어 다시 생각해볼까요?")
+
+        with st.expander("💡 예시 답안과 비교해보기"):
+            st.write("이산화 탄소가 있으면 온실효과 때문에 기온이 상승한다.")
+            st.caption("내가 쓴 답과 비교해보고, 빠진 내용이 있다면 스스로 보완해보세요.")

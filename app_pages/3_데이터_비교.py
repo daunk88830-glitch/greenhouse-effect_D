@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
 st.title("📊 1차시 - ③ 데이터 비교")
@@ -44,11 +43,13 @@ st.markdown(
     "아래는 통합과학2 교과서에 나오는 그래프입니다. "
     "**이산화 탄소 농도와 지구 평균 기온 변화**를 함께 나타낸 것이에요."
 )
-st.image(
-    "assets/textbook_co2_temp_graph.png",
-    caption="출처: 기상청 종합기후변화감시정보",
-    use_container_width=True,
-)
+img_col1, img_col2, img_col3 = st.columns([1, 2, 1])
+with img_col2:
+    st.image(
+        "assets/textbook_co2_temp_graph.png",
+        caption="출처: 기상청 종합기후변화감시정보",
+        width=480,
+    )
 
 st.markdown(
     "**이 그래프, 정말 사실일까요?** 혹시 특정 구간만 잘라서 보여주거나, "
@@ -103,39 +104,111 @@ st.divider()
 # 3) 업로드 + 출처 + 선택 이유 (기존 내용 그대로 유지)
 # ---------------------------------------------------------
 st.subheader("① CSV 업로드 및 출처 · 선택 이유 입력")
-
-uploaded_file = st.file_uploader("내가 찾은 CSV 파일을 업로드하세요", type=["csv"])
-student_source = st.text_input(
-    "이 데이터의 출처를 입력하세요",
-    placeholder="예: 기상청 기상자료개방포털, https://data.kma.go.kr"
+st.markdown(
+    "선생님도 **CO2 농도 자료**와 **기온 자료**, 이렇게 2개의 파일을 따로 준비했었죠? "
+    "여러분도 두 변수(이산화 탄소 농도, 기온)에 대한 자료를 각각 찾아서 올려보세요. "
+    "(아직 하나만 찾았다면 하나만 올려도 괜찮아요.)"
 )
+
+up_col1, up_col2 = st.columns(2)
+with up_col1:
+    st.markdown("**🔵 ① 이산화 탄소 농도 자료**")
+    co2_file = st.file_uploader("CO2 농도 CSV 업로드", type=["csv"], key="co2_file")
+    co2_source = st.text_input(
+        "출처",
+        key="co2_source",
+        placeholder="예: NOAA, https://gml.noaa.gov/ccgg/trends/",
+    )
+with up_col2:
+    st.markdown("**🟠 ② 기온 자료**")
+    temp_file = st.file_uploader("기온 CSV 업로드", type=["csv"], key="temp_file")
+    temp_source = st.text_input(
+        "출처",
+        key="temp_source",
+        placeholder="예: 기상청, https://data.kma.go.kr",
+    )
+
 student_reason = st.text_area(
     "이 지역·기간의 자료를 선택한 이유를 적어주세요.",
     placeholder="예: 내가 사는 지역의 최근 10년간 기온 변화가 궁금해서 서울 지점, 2014~2023년 자료를 선택했다.",
     height=80,
 )
 
-st.subheader("📈 내가 찾은 자료로 그래프 그려보기")
-if uploaded_file is not None:
-    try:
-        student_df = pd.read_csv(uploaded_file)
-    except UnicodeDecodeError:
-        uploaded_file.seek(0)
-        student_df = pd.read_csv(uploaded_file, encoding="cp949")
 
-    numeric_cols = student_df.select_dtypes(include="number").columns.tolist()
-    if numeric_cols:
-        y_cols = st.multiselect("그래프로 볼 변수 선택", numeric_cols, default=numeric_cols[:1])
-        if y_cols:
-            fig_student = px.line(student_df, y=y_cols, title="내가 업로드한 데이터")
-            st.plotly_chart(fig_student, use_container_width=True)
-    else:
-        st.dataframe(student_df.head())
-    st.caption(f"출처: {student_source if student_source else '(출처를 입력해주세요)'}")
-    if student_reason:
-        st.caption(f"선택 이유: {student_reason}")
+def read_csv_safe(f):
+    try:
+        return pd.read_csv(f)
+    except UnicodeDecodeError:
+        f.seek(0)
+        return pd.read_csv(f, encoding="cp949")
+
+
+st.subheader("📈 내가 찾은 자료로 그래프 그려보기")
+if co2_file is not None or temp_file is not None:
+    fig_student = go.Figure()
+    both_uploaded = (co2_file is not None) and (temp_file is not None)
+    co2_y = temp_y = None
+
+    if co2_file is not None:
+        co2_student_df = read_csv_safe(co2_file)
+        co2_num_cols = co2_student_df.select_dtypes(include="number").columns.tolist()
+        if co2_num_cols:
+            cc1, cc2 = st.columns(2)
+            with cc1:
+                co2_x = st.selectbox("CO2 자료 - X축(연도/날짜) 컬럼", co2_student_df.columns.tolist(), key="co2_x")
+            with cc2:
+                co2_y = st.selectbox("CO2 자료 - Y축(농도) 컬럼", co2_num_cols, key="co2_y")
+            fig_student.add_trace(go.Scatter(
+                x=co2_student_df[co2_x], y=co2_student_df[co2_y],
+                name=f"CO2: {co2_y}", mode="lines+markers",
+                line=dict(color="#3B7FC4", width=3),
+            ))
+        else:
+            st.warning("CO2 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
+            st.dataframe(co2_student_df.head())
+
+    if temp_file is not None:
+        temp_student_df = read_csv_safe(temp_file)
+        temp_num_cols = temp_student_df.select_dtypes(include="number").columns.tolist()
+        if temp_num_cols:
+            tc1, tc2 = st.columns(2)
+            with tc1:
+                temp_x = st.selectbox("기온 자료 - X축(연도/날짜) 컬럼", temp_student_df.columns.tolist(), key="temp_x")
+            with tc2:
+                temp_y = st.selectbox("기온 자료 - Y축(기온) 컬럼", temp_num_cols, key="temp_y")
+            fig_student.add_trace(go.Scatter(
+                x=temp_student_df[temp_x], y=temp_student_df[temp_y],
+                name=f"기온: {temp_y}", mode="lines+markers",
+                line=dict(color="#E8752C", width=3),
+                yaxis="y2" if both_uploaded and co2_y else "y",
+            ))
+        else:
+            st.warning("기온 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
+            st.dataframe(temp_student_df.head())
+
+    if co2_y or temp_y:
+        layout_kwargs = dict(
+            title="내가 찾은 자료로 그린 그래프",
+            height=420,
+            margin=dict(l=10, r=10, t=50, b=10),
+            legend=dict(orientation="h", y=1.15),
+        )
+        if both_uploaded and co2_y and temp_y:
+            layout_kwargs["yaxis"] = dict(title="CO2 농도")
+            layout_kwargs["yaxis2"] = dict(title="기온", overlaying="y", side="right")
+        fig_student.update_layout(**layout_kwargs)
+        st.plotly_chart(fig_student, use_container_width=True)
+
+        src_lines = []
+        if co2_y:
+            src_lines.append(f"CO2 자료 출처: {co2_source if co2_source else '(출처를 입력해주세요)'}")
+        if temp_y:
+            src_lines.append(f"기온 자료 출처: {temp_source if temp_source else '(출처를 입력해주세요)'}")
+        st.caption(" · ".join(src_lines))
+        if student_reason:
+            st.caption(f"선택 이유: {student_reason}")
 else:
-    st.info("⬆️ 위에서 CSV 파일을 업로드하면 그래프가 여기에 나타납니다.")
+    st.info("⬆️ 위에서 CO2 자료 또는 기온 자료를 업로드하면(둘 다 올리면 더 좋아요!) 그래프가 여기에 나타납니다.")
 
 st.divider()
 
@@ -229,4 +302,25 @@ match_check = st.radio(
     "실제로 CO2가 늘어난 시기와 기온이 오른 시기가 일치하나요?",
     ["선택해주세요", "대체로 일치한다", "일치하지 않는다", "판단하기 어렵다"]
 )
-topic_1 = st.text_area("이 데이터로 하고 싶은 탐구 주제를 적어보세요.", height=100)
+topic_1 = st.text_area("이 데이터로 하고 싶은 탐구 주제를 적어보세요.", height=100, key="topic_1")
+
+if st.button("제출하기", key="topic_1_submit"):
+    text = topic_1.strip()
+    if not text:
+        st.warning("탐구 주제를 적어주세요.")
+    else:
+        reason_keywords = ["왜냐하면", "때문", "궁금", "싶어서", "싶다", "알아보고"]
+        has_reason = any(k in text for k in reason_keywords)
+        if len(text) < 15:
+            st.info(
+                "좋은 시작이에요! 조금 더 구체적으로 적어볼까요? "
+                "**어떤 자료로, 무엇을, 왜** 알아보고 싶은지 한두 문장 더 써보면 훨씬 좋아져요."
+            )
+        elif not has_reason:
+            st.success(
+                "탐구 주제를 잘 적었어요! 여기에 **왜 그 주제가 궁금한지 이유**까지 한 문장 덧붙이면 "
+                "더 완성도 있는 주제가 될 거예요."
+            )
+        else:
+            st.success("주제와 이유까지 아주 잘 정리했어요! 이 주제로 학기말 탐구를 시작해봐도 좋겠어요. 👏")
+            st.balloons()
