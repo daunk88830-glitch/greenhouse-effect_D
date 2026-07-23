@@ -65,9 +65,11 @@ def draw_greenhouse(co2_ppm):
     xs = rng.uniform(1.3, 8.7, n_molecules)
     ys = rng.uniform(4.5, 5.4, n_molecules)
     labels = rng.choice(["CO2", "CH4", "H2O"], n_molecules)
+    molecule_colors = {"CO2": "#E76F51", "CH4": "#6A994E", "H2O": "#4A90D9"}
     for x, y, lab in zip(xs, ys, labels):
-        ax.add_patch(plt.Circle((x, y), 0.22, color="#F5D48A", alpha=0.9, zorder=3))
-        ax.text(x, y, lab, fontsize=6, ha="center", va="center", zorder=4)
+        ax.add_patch(plt.Circle((x, y), 0.22, color=molecule_colors[lab], alpha=0.9, zorder=3))
+        ax.text(x, y, lab, fontsize=6, color="white", weight="bold",
+                ha="center", va="center", zorder=4)
 
     ax.annotate("", xy=(3.0, 4.3), xytext=(2.0, 8.6),
                 arrowprops=dict(arrowstyle="-|>", color="#FFC300", lw=3))
@@ -104,6 +106,12 @@ with col1:
     st.subheader("대기 재복사 강조 그림")
     fig = draw_greenhouse(co2)
     st.pyplot(fig, use_container_width=True)
+    st.markdown(
+        "<span style='color:#E76F51;'>●</span> CO2 (이산화 탄소) &nbsp;&nbsp;"
+        "<span style='color:#6A994E;'>●</span> CH4 (메테인) &nbsp;&nbsp;"
+        "<span style='color:#4A90D9;'>●</span> H2O (수증기)",
+        unsafe_allow_html=True,
+    )
     st.metric("복사 강제력 (추정)", f"{delta_F:.2f} W/m²",
               help="대기 중 CO2가 늘어나 지구가 추가로 붙잡아두는 에너지의 양(IPCC 공식 기반)")
 
@@ -154,3 +162,11 @@ if quiz != "선택해주세요":
         st.error("다시 생각해볼까요? 슬라이더를 움직여 재복사 화살표가 어떻게 변하는지 다시 확인해보세요.")
 
 reason = st.text_area("왜 그렇게 생각했는지 한 문장으로 써보세요.", height=80)
+
+if reason.strip():
+    with st.expander("💡 예시 답안과 비교해보기"):
+        st.write(
+            "대기 중 이산화 탄소(온실 기체)의 농도가 증가하면 온실효과가 강화되면서 "
+            "지구의 평균 기온이 상승한다."
+        )
+        st.caption("내가 쓴 답과 비교해보고, 빠진 내용이 있다면 스스로 보완해보세요.")
