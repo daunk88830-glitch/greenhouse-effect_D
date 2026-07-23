@@ -14,7 +14,7 @@ p3 = st.Page("app_pages/3_데이터_비교.py", title="데이터 비교", icon="
 
 p4 = st.Page("app_pages/4_열수지_가상실험.py", title="열수지 가상실험", icon="🧪")
 p5 = st.Page("app_pages/5_열수지_계산하기.py", title="열수지 계산하기", icon="🧮")
-p6 = st.Page("app_pages/6_기사_조사_요약.py", title="기사 조사 요약", icon="📰")
+p6 = st.Page("app_pages/6_기사_조사_요약.py", title="기사 조사 및 요약", icon="📰")
 p7 = st.Page("app_pages/7_탐구주제_구상.py", title="탐구주제 구상", icon="💡")
 
 pg = st.navigation({
