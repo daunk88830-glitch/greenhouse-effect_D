@@ -15,11 +15,9 @@
    원자료: https://data.giss.nasa.gov/gistemp/
    (NASA 공개 데이터, 학술/교육 목적 자유 이용 가능)
 
-학생 추천 데이터 링크 (앱의 "자료 찾아보기" 안내에서도 확인 가능):
-- 기상청 기상자료개방포털: https://data.kma.go.kr
-- NOAA 마우나로아 CO2 트렌드: https://gml.noaa.gov/ccgg/trends/
-- NASA GISTEMP: https://data.giss.nasa.gov/gistemp/
-- Our World in Data (CO2 및 온실가스): https://ourworldindata.org/co2-and-greenhouse-gas-emissions
+학생 추천 데이터 링크 (앱의 "자료 찾아보기" 안내에서도 확인 가능, 로그인 불필요·기간/지역 선택 가능):
+- Our World in Data (CO2 농도): https://ourworldindata.org/co2-and-greenhouse-gas-emissions
+- Our World in Data (기온, Climate Change Explorer): https://ourworldindata.org/explorers/climate-change
 
 ※ co2_mm_mlo.csv와 global_temp_annual.csv 원본 파일도 data 폴더에 함께 포함되어 있어,
    학생들이 직접 다운로드하여 스스로 그래프를 그려보는 연습에 사용할 수 있습니다.
