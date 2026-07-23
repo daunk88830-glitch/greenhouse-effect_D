@@ -78,37 +78,20 @@ st.markdown(
 
 with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안내)", expanded=True):
     st.markdown("""
-**① 기상청 기상자료개방포털 (기온 자료, 추천)**
-1. [data.kma.go.kr](https://data.kma.go.kr) 접속
-2. 상단 메뉴에서 **'기후통계분석' → '기온분석'** (또는 '지상관측자료') 클릭
-3. ⚠️ CSV 다운로드에는 **로그인(회원가입)이 필요**해요. 회원가입이 번거롭다면 아래 ④번(Our World in
-   Data)에서도 전 지구 기온 자료를 받을 수 있어요.
-4. 원하는 **지점(예: 서울, 부산, 우리 지역)** 과 **기간**을 선택
-5. 조회 결과 화면에서 **'다운로드' 또는 'CSV' 버튼** 클릭
-
-**② 기상청 온실가스 농도 자료 (CO2 농도, 국내 관측소)**
-1. [data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587](https://data.kma.go.kr/data/gaw/selectGHGsRltmList.do?pgmNo=587) 접속
-2. ⚠️ 이 페이지는 **로그인(회원가입)이 필요**해요. 회원가입이 번거롭다면 아래 ③번이나 ④번을 이용하세요.
-3. 관측 지점(안면도·고산·울릉도독도 중 하나)과 조회 기간을 선택해서 조회
-4. 결과 화면에서 **'CSV 파일 다운로드'** 버튼 클릭
-
-**③ NOAA 마우나로아 CO2 농도 (전 지구 CO2 자료, 로그인 불필요)**
-1. [gml.noaa.gov/ccgg/trends](https://gml.noaa.gov/ccgg/trends) 접속
-2. 화면의 **'Data' 탭**에서 Monthly 또는 Annual CSV/TXT 파일 링크 클릭 → 다운로드
-3. ⚠️ 이 파일은 맨 위에 `#`으로 시작하는 설명 줄이 여러 개 들어있을 수 있어요. 업로드했을 때 오류가
-   나면, 메모장/엑셀로 열어서 `#`으로 시작하는 줄들을 지우고 진짜 표 형태(첫 줄이 컬럼 이름)만
-   남긴 뒤 다시 저장해서 올려보세요.
-
-**④ Our World in Data (전 세계 CO2·기온 자료, 가장 쉬움)**
+**① Our World in Data — CO2 농도 자료 (전 세계, 기간·지역 선택 가능)**
 1. [ourworldindata.org/co2-and-greenhouse-gas-emissions](https://ourworldindata.org/co2-and-greenhouse-gas-emissions) 접속
-2. 원하는 그래프 아래 **'Download' 버튼**이 보이면 클릭해서 CSV 다운로드
-3. 'Download' 버튼 대신 **'Data API'라는 회색 박스**가 보인다면, 그 안의
+2. 그래프에서 원하는 **국가/지역**과 **기간**을 선택
+3. 그래프 아래 **'Download' 버튼**을 클릭해서 CSV 다운로드
+4. 'Download' 버튼 대신 **'Data API'라는 회색 박스**가 보인다면, 그 안의
    **'Data URL (CSV format)'** 옆 복사 아이콘을 눌러 링크를 복사하고, 새 브라우저 탭 주소창에
    붙여넣은 뒤 Enter를 누르세요. 그러면 CSV 파일이 그대로 다운로드됩니다.
 
-**정리하면:** 기온은 ①번(우리 지역 자료, 로그인 필요), CO2 농도는 ②~④번 중 편한 곳에서 찾으면
-돼요. 로그인 없이 바로 받고 싶다면 기온·CO2 모두 **④번(Our World in Data)** 이 가장 간편해요.
-(선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
+**② Our World in Data — 기온 자료 (전 세계, 기간·지역 선택 가능)**
+1. [ourworldindata.org/explorers/climate-change](https://ourworldindata.org/explorers/climate-change?country=ATA~Gulkana+Glacier~Lemon+Creek+Glacier~OWID_NAM~South+Cascade+Glacier~Wolverine+Glacier~Hawaii~Arctic+Ocean~OWID_NH&Metric=Temperature+anomaly&Long-run+series=false) 접속
+2. 그래프에서 원하는 **국가/지역**과 **기간**을 선택
+3. ①번과 같은 방법으로 **'Download' 버튼** 또는 **'Data API'** 박스에서 CSV 다운로드
+
+로그인 없이 두 사이트 모두 바로 이용할 수 있어요. (선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
 구조가 복잡해서 이번 활동에서는 제외했어요. 대신 아래 "선생님이 사용한 그래프"에서 NASA GISTEMP
 자료와 출처를 확인할 수 있습니다.)
 
@@ -133,7 +116,7 @@ with up_col1:
     co2_source = st.text_input(
         "출처",
         key="co2_source",
-        placeholder="예: NOAA, https://gml.noaa.gov/ccgg/trends/",
+        placeholder="예: Our World in Data, https://ourworldindata.org/co2-and-greenhouse-gas-emissions",
     )
 with up_col2:
     st.markdown("**🟠 ② 기온 자료**")
@@ -141,7 +124,7 @@ with up_col2:
     temp_source = st.text_input(
         "출처",
         key="temp_source",
-        placeholder="예: 기상청, https://data.kma.go.kr",
+        placeholder="예: Our World in Data, https://ourworldindata.org/explorers/climate-change",
     )
 
 student_reason = st.text_area(
@@ -352,9 +335,7 @@ if co2_file is not None or temp_file is not None:
         co2_student_df, co2_err = read_csv_safe(co2_file)
         if co2_student_df is None:
             st.error(
-                "CO2 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요. "
-                "특히 NOAA 자료는 맨 위에 '#'으로 시작하는 설명 줄이 있으면 오류가 날 수 있어요 "
-                "(위 '자료 찾아보기' 안내의 ② NOAA 주의사항 참고)."
+                "CO2 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요."
             )
         else:
             co2_student_df, co2_was_filtered = filter_to_world_if_mixed(co2_student_df)
