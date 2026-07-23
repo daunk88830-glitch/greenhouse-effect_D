@@ -61,10 +61,19 @@ def draw_greenhouse(co2_ppm):
     ax.add_patch(plt.Rectangle((1.0, 1.0), 8.0, 1.0, color="#6FAE3E", zorder=1))
     ax.text(1.2, 1.5, "지표", fontsize=12, color="#12432F", weight="bold")
 
+    # CO2/CH4/H2O 개수를 무작위로 뽑으면(예전 방식) 슬라이더를 올려도 우연히 CO2 개수가
+    # 줄어드는 경우가 생길 수 있어서, CH4·H2O는 소량으로 고정하고 나머지를 모두 CO2로 채워
+    # CO2 농도가 늘어날수록 CO2 개수가 반드시 늘어나도록(단조 증가) 만든다.
+    n_ch4 = 1
+    n_h2o = 1
+    n_co2 = max(1, n_molecules - n_ch4 - n_h2o)
+    labels = np.array(["CO2"] * n_co2 + ["CH4"] * n_ch4 + ["H2O"] * n_h2o)
+
     rng = np.random.default_rng(42)
-    xs = rng.uniform(1.3, 8.7, n_molecules)
-    ys = rng.uniform(4.5, 5.4, n_molecules)
-    labels = rng.choice(["CO2", "CH4", "H2O"], n_molecules)
+    rng.shuffle(labels)
+    total = len(labels)
+    xs = rng.uniform(1.3, 8.7, total)
+    ys = rng.uniform(4.5, 5.4, total)
     molecule_colors = {"CO2": "#E76F51", "CH4": "#6A994E", "H2O": "#4A90D9"}
     for x, y, lab in zip(xs, ys, labels):
         ax.add_patch(plt.Circle((x, y), 0.22, color=molecule_colors[lab], alpha=0.9, zorder=3))
@@ -103,7 +112,7 @@ est_temp = 15 + delta_T
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("대기 재복사 강조 그림")
+    st.subheader("대기 재복사 강조")
     fig = draw_greenhouse(co2)
     st.pyplot(fig, use_container_width=True)
     st.markdown(

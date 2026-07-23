@@ -21,7 +21,7 @@ with col_img:
     st.image(
         "assets/textbook_heat_budget_diagram_only.png",
         caption="지구의 열수지 평형 (출처: 『대기과학』, 2016.)",
-        width=520,
+        width=676,
     )
 
 with col_input:
@@ -137,38 +137,3 @@ if st.button("정답 확인", key="check2"):
             "대기가 지표로 재복사하는 에너지양 **증가**(94보다) → 지표가 다시 흡수하는 에너지양 **증가**"
             "(94보다) → 지표 온도 **상승**. 이것이 온실효과가 강화되어 지구 온난화가 일어나는 원리예요."
         )
-
-st.divider()
-
-# ---------------------------------------------------------
-# 3) 형성평가 — 위 그림과는 다른 수치로 A값 구하기 (빈칸 1개)
-# ---------------------------------------------------------
-st.subheader("✅ 형성평가 — 다른 수치로 A값 구하기")
-st.markdown("아래는 위 ①번 그림과는 **다른 값**으로 주어진 지구 열수지 그림입니다. **A**값을 구해보세요.")
-
-col_qimg, col_qinput = st.columns([1.15, 1])
-
-with col_qimg:
-    st.image("assets/quiz.png", caption="지구의 열수지 (예시와 다른 수치)", width=460)
-
-with col_qinput:
-    st.caption("💡 힌트: 지표(또는 대기)도 열수지 평형을 이루므로, 유입되는 에너지양과 "
-               "유출되는 에너지양이 서로 같아야 해요.")
-    quiz_answer = st.text_input("A값은?", key="formative_quiz", placeholder="숫자만 입력")
-
-    if st.button("정답 확인", key="check_formative"):
-        parsed = parse_int(quiz_answer)
-        if parsed is None:
-            st.warning("숫자로 입력해주세요.")
-        elif parsed == 25:
-            st.success("정답입니다! A = 25예요. 👏")
-            st.balloons()
-        else:
-            st.error(f"{parsed} → 다시 계산해보세요.")
-
-        with st.expander("🔎 계산 방법 확인하기"):
-            st.markdown("""
-- **지표로 풀기**: 지표 유입(45 + 88 = 133) = 지표 유출(A + 104 + 4) → A = 133 − 108 = **25**
-- **대기로 풀기**: 대기 유입(25 + A + 104) = 대기 유출(88 + 66 = 154) → A = 154 − 129 = **25**
-- 두 compartment 중 어느 쪽으로 풀어도 같은 답이 나와요. 이것이 지표·대기가 각각 열수지 평형을 이루고 있다는 증거예요.
-""")

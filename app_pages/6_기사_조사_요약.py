@@ -43,17 +43,17 @@ st.markdown("찾아본 기사를 바탕으로, 지구온난화의 피해를 줄�
 
 action_me = st.text_area(
     "🙋 나 (개인) 차원에서 할 수 있는 일",
-    placeholder="예: 대중교통을 이용하고, 사용하지 않는 전자기기의 전원을 꺼둔다.",
+    placeholder="내가 일상에서 실천할 수 있는 일을 자유롭게 적어보세요.",
     height=80, key="action_me",
 )
 action_nation = st.text_area(
     "🏛️ 국가 차원에서 할 수 있는 일",
-    placeholder="예: 재생에너지 발전 비중을 늘리고, 탄소 배출 규제를 강화한다.",
+    placeholder="정부나 국가 정책 차원에서 할 수 있는 일을 자유롭게 적어보세요.",
     height=80, key="action_nation",
 )
 action_global = st.text_area(
     "🌍 전 지구 차원에서 할 수 있는 일",
-    placeholder="예: 국제 협약(파리협정 등)을 통해 국가 간 온실가스 감축 목표를 함께 지키고 협력한다.",
+    placeholder="여러 나라가 함께, 전 지구적으로 할 수 있는 일을 자유롭게 적어보세요.",
     height=80, key="action_global",
 )
 
@@ -75,3 +75,11 @@ if st.button("제출하기", key="actions_submit"):
             missing.append("전 지구")
         st.info("좋은 시작이에요! " + ", ".join(missing) + " 관점에서도 할 수 있는 일을 생각해서 "
                 "채워보면 더 풍부한 답이 될 거예요.")
+
+    with st.expander("💡 예시 답안과 비교해보기"):
+        st.markdown("""
+- 🙋 **나**: 대중교통을 이용하고, 사용하지 않는 전자기기의 전원을 꺼둔다.
+- 🏛️ **국가**: 재생에너지 발전 비중을 늘리고, 탄소 배출 규제를 강화한다.
+- 🌍 **전 지구**: 국제 협약(파리협정 등)을 통해 국가 간 온실가스 감축 목표를 함께 지키고 협력한다.
+""")
+        st.caption("내가 쓴 답과 비교해보고, 빠진 내용이 있다면 스스로 보완해보세요.")
