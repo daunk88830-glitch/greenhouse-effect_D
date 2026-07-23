@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -76,7 +77,7 @@ st.markdown(
 
 with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안내)", expanded=True):
     st.markdown("""
-**① 기상청 기상자료개방포털 (국내 기온 자료, 추천)**
+**① 기상청 기상자료개방포털 (기온 자료, 추천)**
 1. [data.kma.go.kr](https://data.kma.go.kr) 접속
 2. 상단 메뉴에서 **'기후통계분석' → '기온분석'** (또는 '지상관측자료') 클릭
 3. 원하는 **지점(예: 서울, 부산, 우리 지역)** 과 **기간**을 선택
@@ -85,15 +86,20 @@ with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안�
 **② NOAA 마우나로아 CO2 농도 (전 지구 CO2 자료)**
 1. [gml.noaa.gov/ccgg/trends](https://gml.noaa.gov/ccgg/trends) 접속
 2. 화면의 **'Data' 탭**에서 Monthly 또는 Annual CSV/TXT 파일 링크 클릭 → 다운로드
+3. ⚠️ 이 파일은 맨 위에 `#`으로 시작하는 설명 줄이 여러 개 들어있을 수 있어요. 업로드했을 때 오류가
+   나면, 메모장/엑셀로 열어서 `#`으로 시작하는 줄들을 지우고 진짜 표 형태(첫 줄이 컬럼 이름)만
+   남긴 뒤 다시 저장해서 올려보세요.
 
-**③ Our World in Data (초보자에게 가장 쉬움, 추천)**
+**③ Our World in Data (전 세계 CO2 자료)**
 1. [ourworldindata.org/co2-and-greenhouse-gas-emissions](https://ourworldindata.org/co2-and-greenhouse-gas-emissions) 접속
-2. 페이지를 내려서 원하는 그래프를 찾고, 그래프 아래 **'Download' 버튼**에서 CSV 다운로드
-3. 국가별·연도별로 이미 깔끔하게 정리되어 있어서 **엑셀처럼 바로 열어볼 수 있어요**
+2. 원하는 그래프 아래 **'Download' 버튼**이 보이면 클릭해서 CSV 다운로드
+3. 'Download' 버튼 대신 **'Data API'라는 회색 박스**가 보인다면, 그 안의
+   **'Data URL (CSV format)'** 옆 복사 아이콘을 눌러 링크를 복사하고, 새 브라우저 탭 주소창에
+   붙여넣은 뒤 Enter를 누르세요. 그러면 CSV 파일이 그대로 다운로드됩니다.
 
-**④ NASA GISTEMP (전 지구 기온 이상치)**
-1. [data.giss.nasa.gov/gistemp](https://data.giss.nasa.gov/gistemp) 접속
-2. 'Global-mean monthly, seasonal, and annual means' 표에서 CSV 다운로드
+**기온 자료는 ①번 기상청 자료를 추천해요.** (선생님이 사용한 NASA GISTEMP 전 지구 자료는 사이트
+구조가 복잡해서 이번 활동에서는 제외했어요. 대신 아래 "선생님이 사용한 그래프"에서 NASA GISTEMP
+자료와 출처를 확인할 수 있습니다.)
 
 자료를 다운로드했으면, 엑셀이나 이 웹앱에서 열어 어떤 열(컬럼)이 있는지 먼저 확인해보세요.
 """)
@@ -135,11 +141,50 @@ student_reason = st.text_area(
 
 
 def read_csv_safe(f):
+    """여러 인코딩·구분자·주석 형식을 순서대로 시도해서 최대한 안전하게 CSV를 읽는다.
+    (NOAA 원자료처럼 맨 위에 #으로 시작하는 설명 줄이 섞여 있거나, 구분자가 다르거나,
+    줄마다 컬럼 수가 안 맞는 경우에도 최대한 읽어보려고 시도한다.)
+    반환값: (DataFrame 또는 None, 오류 또는 None)
+    """
+    attempts = [
+        dict(),
+        dict(encoding="cp949"),
+        dict(comment="#"),
+        dict(comment="#", encoding="cp949"),
+        dict(on_bad_lines="skip"),
+        dict(comment="#", on_bad_lines="skip"),
+    ]
+    last_err = None
+    for kwargs in attempts:
+        try:
+            f.seek(0)
+            df = pd.read_csv(f, **kwargs)
+            # 컬럼이 1개뿐이면 대부분 구분자/주석 처리가 잘못돼 한 줄이 통째로 붙어버린
+            # 경우라서(진짜 데이터로 보기 어려움) 실패로 간주하고 다음 방법을 시도한다.
+            if df.shape[1] >= 2 and len(df) > 0:
+                return df, None
+        except Exception as e:
+            last_err = e
+            continue
+
+    # 마지막 수단: 실제 NOAA 자료처럼 '#' 설명 줄 + 헤더와 데이터의 컬럼 수가 어긋난 경우.
+    # 주석 줄과 (컬럼 수가 다른) 헤더 줄을 통째로 버리고, 실제 데이터 줄의 컬럼 수를 기준으로
+    # 다시 읽는다. 컬럼 이름은 "컬럼1, 컬럼2 ..."로 대체되지만, 최소한 그래프는 그릴 수 있다.
     try:
-        return pd.read_csv(f)
-    except UnicodeDecodeError:
         f.seek(0)
-        return pd.read_csv(f, encoding="cp949")
+        raw = f.read()
+        text = raw.decode("utf-8", errors="ignore") if isinstance(raw, bytes) else raw
+        lines = [ln for ln in text.splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
+        if len(lines) >= 3:
+            data_lines = lines[1:]  # 첫 줄(헤더로 추정)은 버리고 데이터 줄만 사용
+            df = pd.read_csv(io.StringIO("\n".join(data_lines)), header=None, on_bad_lines="skip")
+            if df.shape[1] >= 2 and len(df) > 0:
+                df.columns = [f"컬럼{i + 1}" for i in range(df.shape[1])]
+                return df, None
+    except Exception as e:
+        last_err = e
+
+    return None, last_err
 
 
 # 학생들이 기상청/NOAA/GISTEMP/Our World in Data 등에서 흔히 받게 되는 컬럼명을
@@ -175,69 +220,100 @@ def guess_default_index(cols, axis_kind):
 
 
 st.subheader("📈 내가 찾은 자료로 그래프 그려보기")
+st.caption("파일을 업로드하면 가로축(연도/날짜)과 세로축(값)을 자동으로 인식해서 바로 그래프를 그려줘요.")
 if co2_file is not None or temp_file is not None:
     fig_student = go.Figure()
     both_uploaded = (co2_file is not None) and (temp_file is not None)
     co2_y = temp_y = None
 
     if co2_file is not None:
-        co2_student_df = read_csv_safe(co2_file)
-        co2_num_cols = co2_student_df.select_dtypes(include="number").columns.tolist()
-        if co2_num_cols:
-            co2_x_options = co2_student_df.columns.tolist()
-            cc1, cc2 = st.columns(2)
-            with cc1:
-                co2_x = st.selectbox(
-                    "CO2 자료 - 가로축(연도/날짜) 선택", co2_x_options,
-                    index=guess_default_index(co2_x_options, "x"),
-                    format_func=lambda c: korean_col_label(c, "x"),
-                    key="co2_x",
-                )
-            with cc2:
-                co2_y = st.selectbox(
-                    "CO2 자료 - 세로축(CO2 농도) 선택", co2_num_cols,
-                    index=guess_default_index(co2_num_cols, "y_co2"),
-                    format_func=lambda c: korean_col_label(c, "y_co2"),
-                    key="co2_y",
-                )
-            fig_student.add_trace(go.Scatter(
-                x=co2_student_df[co2_x], y=co2_student_df[co2_y],
-                name="🔵 CO2 농도", mode="lines+markers",
-                line=dict(color="#3B7FC4", width=3),
-            ))
+        co2_student_df, co2_err = read_csv_safe(co2_file)
+        if co2_student_df is None:
+            st.error(
+                "CO2 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요. "
+                "특히 NOAA 자료는 맨 위에 '#'으로 시작하는 설명 줄이 있으면 오류가 날 수 있어요 "
+                "(위 '자료 찾아보기' 안내의 ② NOAA 주의사항 참고)."
+            )
         else:
-            st.warning("CO2 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
-            st.dataframe(co2_student_df.head())
+            try:
+                co2_num_cols = co2_student_df.select_dtypes(include="number").columns.tolist()
+                if co2_num_cols:
+                    co2_x_options = co2_student_df.columns.tolist()
+                    auto_co2_x = co2_x_options[guess_default_index(co2_x_options, "x")]
+                    auto_co2_y = co2_num_cols[guess_default_index(co2_num_cols, "y_co2")]
+                    with st.expander(
+                        f"⚙️ CO2 그래프 축 자동 인식 결과 — 가로축: {auto_co2_x} · 세로축: {auto_co2_y} "
+                        "(다르게 바꾸고 싶다면 클릭)"
+                    ):
+                        cc1, cc2 = st.columns(2)
+                        with cc1:
+                            co2_x = st.selectbox(
+                                "가로축(연도/날짜) 선택", co2_x_options,
+                                index=guess_default_index(co2_x_options, "x"),
+                                format_func=lambda c: korean_col_label(c, "x"),
+                                key="co2_x",
+                            )
+                        with cc2:
+                            co2_y = st.selectbox(
+                                "세로축(CO2 농도) 선택", co2_num_cols,
+                                index=guess_default_index(co2_num_cols, "y_co2"),
+                                format_func=lambda c: korean_col_label(c, "y_co2"),
+                                key="co2_y",
+                            )
+                    fig_student.add_trace(go.Scatter(
+                        x=co2_student_df[co2_x], y=co2_student_df[co2_y],
+                        name="🔵 CO2 농도", mode="lines+markers",
+                        line=dict(color="#3B7FC4", width=3),
+                    ))
+                else:
+                    st.warning("CO2 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
+                    st.dataframe(co2_student_df.head())
+            except Exception as e:
+                st.error(f"CO2 자료로 그래프를 그리는 중 문제가 발생했어요: {e}")
 
     if temp_file is not None:
-        temp_student_df = read_csv_safe(temp_file)
-        temp_num_cols = temp_student_df.select_dtypes(include="number").columns.tolist()
-        if temp_num_cols:
-            temp_x_options = temp_student_df.columns.tolist()
-            tc1, tc2 = st.columns(2)
-            with tc1:
-                temp_x = st.selectbox(
-                    "기온 자료 - 가로축(연도/날짜) 선택", temp_x_options,
-                    index=guess_default_index(temp_x_options, "x"),
-                    format_func=lambda c: korean_col_label(c, "x"),
-                    key="temp_x",
-                )
-            with tc2:
-                temp_y = st.selectbox(
-                    "기온 자료 - 세로축(기온) 선택", temp_num_cols,
-                    index=guess_default_index(temp_num_cols, "y_temp"),
-                    format_func=lambda c: korean_col_label(c, "y_temp"),
-                    key="temp_y",
-                )
-            fig_student.add_trace(go.Scatter(
-                x=temp_student_df[temp_x], y=temp_student_df[temp_y],
-                name="🟠 기온", mode="lines+markers",
-                line=dict(color="#E8752C", width=3),
-                yaxis="y2" if both_uploaded and co2_y else "y",
-            ))
+        temp_student_df, temp_err = read_csv_safe(temp_file)
+        if temp_student_df is None:
+            st.error(
+                "기온 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요."
+            )
         else:
-            st.warning("기온 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
-            st.dataframe(temp_student_df.head())
+            try:
+                temp_num_cols = temp_student_df.select_dtypes(include="number").columns.tolist()
+                if temp_num_cols:
+                    temp_x_options = temp_student_df.columns.tolist()
+                    auto_temp_x = temp_x_options[guess_default_index(temp_x_options, "x")]
+                    auto_temp_y = temp_num_cols[guess_default_index(temp_num_cols, "y_temp")]
+                    with st.expander(
+                        f"⚙️ 기온 그래프 축 자동 인식 결과 — 가로축: {auto_temp_x} · 세로축: {auto_temp_y} "
+                        "(다르게 바꾸고 싶다면 클릭)"
+                    ):
+                        tc1, tc2 = st.columns(2)
+                        with tc1:
+                            temp_x = st.selectbox(
+                                "가로축(연도/날짜) 선택", temp_x_options,
+                                index=guess_default_index(temp_x_options, "x"),
+                                format_func=lambda c: korean_col_label(c, "x"),
+                                key="temp_x",
+                            )
+                        with tc2:
+                            temp_y = st.selectbox(
+                                "세로축(기온) 선택", temp_num_cols,
+                                index=guess_default_index(temp_num_cols, "y_temp"),
+                                format_func=lambda c: korean_col_label(c, "y_temp"),
+                                key="temp_y",
+                            )
+                    fig_student.add_trace(go.Scatter(
+                        x=temp_student_df[temp_x], y=temp_student_df[temp_y],
+                        name="🟠 기온", mode="lines+markers",
+                        line=dict(color="#E8752C", width=3),
+                        yaxis="y2" if both_uploaded and co2_y else "y",
+                    ))
+                else:
+                    st.warning("기온 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
+                    st.dataframe(temp_student_df.head())
+            except Exception as e:
+                st.error(f"기온 자료로 그래프를 그리는 중 문제가 발생했어요: {e}")
 
     if co2_y or temp_y:
         st.markdown("**📊 내가 찾은 자료로 그린 그래프**")
