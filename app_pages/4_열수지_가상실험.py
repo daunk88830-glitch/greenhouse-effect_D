@@ -37,7 +37,7 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("🔮 실험 전 예측해보기")
 prediction = st.text_area(
-    "페트병 A(CO2 없음)와 페트병 B(CO2 있음) 중 어느 쪽의 온도가 더 높이 올라갈까요? "
+    "페트병 A(CO₂ 없음)와 페트병 B(CO₂ 있음) 중 어느 쪽의 온도가 더 높이 올라갈까요? "
     "그렇게 생각한 이유도 함께 적어보세요.",
     height=100,
     placeholder="예: 페트병 A(또는 B)의 온도가 더 높이 올라갈 것 같다. 왜냐하면 ~라고 생각하기 때문이다.",
@@ -86,11 +86,11 @@ def run_trial(label, asymptote, color):
 
 c1, c2 = st.columns(2)
 with c1:
-    if st.button("🅰️ 페트병 A (CO2 없음) 실험 시작", use_container_width=True):
-        run_trial("A: CO2 없음", 24.0, "#378ADD")
+    if st.button("🅰️ 페트병 A (CO₂ 없음) 실험 시작", use_container_width=True):
+        run_trial("A: CO₂ 없음", 24.0, "#378ADD")
 with c2:
-    if st.button("🅱️ 페트병 B (CO2 있음) 실험 시작", use_container_width=True):
-        run_trial("B: CO2 있음", 29.0, "#D85A30")
+    if st.button("🅱️ 페트병 B (CO₂ 있음) 실험 시작", use_container_width=True):
+        run_trial("B: CO₂ 있음", 29.0, "#D85A30")
 
 if st.session_state.trials:
     fig = go.Figure()
@@ -129,7 +129,7 @@ if st.button("제출하기", key="obs_submit"):
         elif has_greenhouse or has_temp:
             st.info("좋은 방향이에요! '온실효과'와 '기온 상승'을 연결지어서 한 문장으로 더 정리해볼까요?")
         else:
-            st.warning("페트병 B(CO2 있음)가 더 높은 온도까지 올라간 이유를 온실효과와 연결지어 다시 생각해볼까요?")
+            st.warning("페트병 B(CO₂ 있음)가 더 높은 온도까지 올라간 이유를 온실효과와 연결지어 다시 생각해볼까요?")
 
         with st.expander("💡 예시 답안과 비교해보기"):
             st.write("이산화 탄소가 있으면 온실효과 때문에 기온이 상승한다.")
@@ -162,6 +162,6 @@ if st.button("제출하기", key="obs_submit"):
                     )
                 else:
                     st.info(
-                        "예측했던 내용과 실제 관찰 결과를 다시 한번 비교해보세요. 페트병 B(CO2 있음)의 온도가 "
+                        "예측했던 내용과 실제 관찰 결과를 다시 한번 비교해보세요. 페트병 B(CO₂ 있음)의 온도가 "
                         "더 높이 올라간 것과 나의 처음 예측이 같은 방향인지 확인해보면 좋겠어요."
                     )

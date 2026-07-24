@@ -60,6 +60,8 @@ with left_col:
             unsafe_allow_html=True,
         )
 
+    st.caption("출처: 『중등 과학3』(2015 개정, 비상교육) 59쪽, 그림 2-3. 대기가 없을 때와 있을 때의 복사 평형")
+
 with right_col:
     st.markdown("""
     <div style="background-color:#FFF7E6; border:2px solid #F2A623; border-radius:10px;

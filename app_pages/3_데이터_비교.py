@@ -42,14 +42,14 @@ except FileNotFoundError:
 # ---------------------------------------------------------
 st.subheader("🔎 정말 그럴까?")
 st.markdown(
-    "아래는 통합과학2 교과서에 나오는 그래프입니다. "
+    "아래는 통합과학2_22개정 미래엔 81p에 나오는 그래프입니다. "
     "**이산화 탄소 농도와 지구 평균 기온 변화**를 함께 나타낸 것이에요."
 )
 img_col1, img_col2, img_col3 = st.columns([1, 2, 1])
 with img_col2:
     st.image(
         "assets/textbook_co2_temp_graph.png",
-        caption="출처: 기상청 종합기후변화감시정보",
+        caption="출처: 통합과학2_22개정 미래엔 81p",
         width=620,
     )
 
@@ -58,7 +58,7 @@ st.markdown(
     "우연히 두 그래프의 모양이 비슷해 보이는 건 아닐까요?"
 )
 st.radio(
-    "이 그래프를 보고 어떤 생각이 드나요? **정말 CO2가 늘어나면 기온도 오를까요?**",
+    "이 그래프를 보고 어떤 생각이 드나요? **정말 CO₂가 늘어나면 기온도 오를까요?**",
     ["선택해주세요", "그렇다, 확실히 관련 있어 보인다", "우연의 일치일 수도 있다", "잘 모르겠다, 더 확인해보고 싶다"],
     key="hook_question",
 )
@@ -72,13 +72,13 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("🔗 나만의 자료 찾아보기")
 st.markdown(
-    "이제 여러분 차례예요! CO2 농도나 기온 변화에 관한 자료를 직접 찾아보고, "
+    "이제 여러분 차례예요! CO₂ 농도나 기온 변화에 관한 자료를 직접 찾아보고, "
     "**어떤 지역·기간의 자료를 골랐는지, 왜 그렇게 골랐는지**도 함께 적어볼 거예요."
 )
 
 with st.expander("📍 어디서, 어떻게 자료를 찾을까? (자세한 안내)", expanded=True):
     st.markdown("""
-**① Our World in Data — CO2 농도 자료 (전 세계, 기간·지역 선택 가능)**
+**① Our World in Data — CO₂ 농도 자료 (전 세계, 기간·지역 선택 가능)**
 1. [ourworldindata.org/co2-and-greenhouse-gas-emissions](https://ourworldindata.org/co2-and-greenhouse-gas-emissions) 접속
 2. 그래프에서 원하는 **국가/지역**과 **기간**을 선택
 3. 그래프 아래 **'Download' 버튼**을 클릭해서 CSV 다운로드
@@ -105,14 +105,14 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("① CSV 업로드 및 출처 · 선택 이유 입력")
 st.markdown(
-    "위 그래프와 같이 **CO2 농도 자료**와 **기온 자료**, 이렇게 2개의 자료를 각각 찾아서 올려보세요. "
+    "위 그래프와 같이 **CO₂ 농도 자료**와 **기온 자료**, 이렇게 2개의 자료를 각각 찾아서 올려보세요. "
     "(아직 하나만 찾았다면 하나만 올려도 괜찮아요.)"
 )
 
 up_col1, up_col2 = st.columns(2)
 with up_col1:
     st.markdown("**🔵 ① 이산화 탄소 농도 자료**")
-    co2_file = st.file_uploader("CO2 농도 CSV 업로드", type=["csv"], key="co2_file")
+    co2_file = st.file_uploader("CO₂ 농도 CSV 업로드", type=["csv"], key="co2_file")
     co2_source = st.text_input(
         "출처",
         key="co2_source",
@@ -276,7 +276,7 @@ def korean_col_label(col, axis_kind):
     if axis_kind == "x" and any(k in name for k in _X_KEYWORDS):
         return f"📅 연도/날짜 (원본 컬럼명: {col})"
     if axis_kind == "y_co2" and any(k in name for k in _Y_CO2_KEYWORDS):
-        return f"🔵 CO2 농도 (원본 컬럼명: {col})"
+        return f"🔵 CO₂ 농도 (원본 컬럼명: {col})"
     if axis_kind == "y_temp" and any(k in name for k in _Y_TEMP_KEYWORDS):
         return f"🟠 기온 (원본 컬럼명: {col})"
     return f"{col} (직접 확인 필요)"
@@ -335,7 +335,7 @@ if co2_file is not None or temp_file is not None:
         co2_student_df, co2_err = read_csv_safe(co2_file)
         if co2_student_df is None:
             st.error(
-                "CO2 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요."
+                "CO₂ 자료를 읽는 중 문제가 발생했어요. 파일이 진짜 CSV(쉼표로 구분된 표) 형식인지 확인해주세요."
             )
         else:
             co2_student_df, co2_was_filtered = filter_to_world_if_mixed(co2_student_df)
@@ -349,7 +349,7 @@ if co2_file is not None or temp_file is not None:
                     auto_co2_x = co2_x_options[guess_default_index(co2_x_options, "x")]
                     auto_co2_y = co2_num_cols[guess_default_index(co2_num_cols, "y_co2")]
                     with st.expander(
-                        f"⚙️ CO2 그래프 축 자동 인식 결과 — 가로축: {auto_co2_x} · 세로축: {auto_co2_y} "
+                        f"⚙️ CO₂ 그래프 축 자동 인식 결과 — 가로축: {auto_co2_x} · 세로축: {auto_co2_y} "
                         "(다르게 바꾸고 싶다면 클릭)"
                     ):
                         cc1, cc2 = st.columns(2)
@@ -362,7 +362,7 @@ if co2_file is not None or temp_file is not None:
                             )
                         with cc2:
                             co2_y = st.selectbox(
-                                "세로축(CO2 농도) 선택", co2_num_cols,
+                                "세로축(CO₂ 농도) 선택", co2_num_cols,
                                 index=guess_default_index(co2_num_cols, "y_co2"),
                                 format_func=lambda c: korean_col_label(c, "y_co2"),
                                 key="co2_y",
@@ -370,14 +370,14 @@ if co2_file is not None or temp_file is not None:
                     co2_plot_df = co2_student_df[[co2_x, co2_y]].dropna().sort_values(co2_x)
                     fig_student.add_trace(go.Scatter(
                         x=co2_plot_df[co2_x], y=co2_plot_df[co2_y],
-                        name="🔵 CO2 농도", mode="lines+markers",
+                        name="🔵 CO₂ 농도", mode="lines+markers",
                         line=dict(color="#3B7FC4", width=3),
                     ))
                 else:
-                    st.warning("CO2 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
+                    st.warning("CO₂ 자료에서 숫자로 된 값 컬럼을 찾지 못했어요. 아래 표를 확인해주세요.")
                     st.dataframe(co2_student_df.head())
             except Exception as e:
-                st.error(f"CO2 자료로 그래프를 그리는 중 문제가 발생했어요: {e}")
+                st.error(f"CO₂ 자료로 그래프를 그리는 중 문제가 발생했어요: {e}")
 
     if temp_file is not None:
         temp_student_df, temp_err = read_csv_safe(temp_file)
@@ -436,10 +436,10 @@ if co2_file is not None or temp_file is not None:
             legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="center", x=0.5),
         )
         if both_uploaded and co2_y and temp_y:
-            layout_kwargs["yaxis"] = dict(title="🔵 CO2 농도")
+            layout_kwargs["yaxis"] = dict(title="🔵 CO₂ 농도")
             layout_kwargs["yaxis2"] = dict(title="🟠 기온", overlaying="y", side="right")
         elif co2_y:
-            layout_kwargs["yaxis"] = dict(title="🔵 CO2 농도")
+            layout_kwargs["yaxis"] = dict(title="🔵 CO₂ 농도")
         elif temp_y:
             layout_kwargs["yaxis"] = dict(title="🟠 기온")
         fig_student.update_layout(**layout_kwargs)
@@ -447,14 +447,14 @@ if co2_file is not None or temp_file is not None:
 
         src_lines = []
         if co2_y:
-            src_lines.append(f"CO2 자료 출처: {co2_source if co2_source else '(출처를 입력해주세요)'}")
+            src_lines.append(f"CO₂ 자료 출처: {co2_source if co2_source else '(출처를 입력해주세요)'}")
         if temp_y:
             src_lines.append(f"기온 자료 출처: {temp_source if temp_source else '(출처를 입력해주세요)'}")
         st.caption(" · ".join(src_lines))
         if student_reason:
             st.caption(f"선택 이유: {student_reason}")
 else:
-    st.info("⬆️ 위에서 CO2 자료 또는 기온 자료를 업로드하면(둘 다 올리면 더 좋아요!) 그래프가 여기에 나타납니다.")
+    st.info("⬆️ 위에서 CO₂ 자료 또는 기온 자료를 업로드하면(둘 다 올리면 더 좋아요!) 그래프가 여기에 나타납니다.")
 
 st.divider()
 
@@ -471,7 +471,7 @@ st.markdown(
 with st.expander("👀 선생님이 사용한 그래프 확인하기 (클릭해서 펼치기)"):
     if teacher_df is not None:
         st.markdown(
-            f"**📊 연도별 CO2 농도 및 기온 이상치 ({teacher_df['Year'].min()}~{teacher_df['Year'].max()}, 실제 관측)**"
+            f"**📊 연도별 CO₂ 농도 및 기온 이상치 ({teacher_df['Year'].min()}~{teacher_df['Year'].max()}, 실제 관측)**"
         )
         fig_teacher = go.Figure()
         fig_teacher.add_trace(go.Scatter(
@@ -481,21 +481,21 @@ with st.expander("👀 선생님이 사용한 그래프 확인하기 (클릭해�
         ))
         fig_teacher.add_trace(go.Scatter(
             x=teacher_df["Year"], y=teacher_df["CO2_ppm"],
-            name="🔵 CO2 농도 (ppm)", mode="lines",
+            name="🔵 CO₂ 농도 (ppm)", mode="lines",
             line=dict(color="#3B7FC4", width=3),
             yaxis="y2",
         ))
         fig_teacher.update_layout(
             xaxis_title="연도(년)",
             yaxis=dict(title="🟠 기온 편차 (℃)"),
-            yaxis2=dict(title="🔵 CO2 농도 (ppm)", overlaying="y", side="right"),
+            yaxis2=dict(title="🔵 CO₂ 농도 (ppm)", overlaying="y", side="right"),
             legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5),
             height=460,
             margin=dict(l=10, r=10, t=20, b=80),
         )
         st.plotly_chart(fig_teacher, use_container_width=True)
         st.caption(
-            "출처: CO2 농도 — NOAA Global Monitoring Laboratory (gml.noaa.gov/ccgg/trends, 마우나로아 관측소 연평균) · "
+            "출처: CO₂ 농도 — NOAA Global Monitoring Laboratory (gml.noaa.gov/ccgg/trends, 마우나로아 관측소 연평균) · "
             "기온 편차 — NASA GISTEMP (data.giss.nasa.gov/gistemp). 두 자료 모두 data 폴더의 sources.txt에 정리되어 있습니다."
         )
     else:
@@ -504,11 +504,11 @@ with st.expander("👀 선생님이 사용한 그래프 확인하기 (클릭해�
     st.markdown("#### 🧑‍🏫 선생님은 왜 이 데이터를 골랐을까?")
     st.markdown("""
     - **지역(마우나로아)**: 하와이 마우나로아 관측소는 도시나 공장 같은 오염원에서 멀리 떨어져 있어,
-      **지역적 영향을 받지 않는 전 지구 대기의 평균적인 CO2 농도**를 잘 보여줍니다. 그래서 전 세계
-      과학자들이 가장 신뢰하는 CO2 기준 자료로 씁니다.
-    - **기간**: 마우나로아에서 CO2를 측정하기 시작한 1958년 이후, 두 자료(CO2, 기온)가
+      **지역적 영향을 받지 않는 전 지구 대기의 평균적인 CO₂ 농도**를 잘 보여줍니다. 그래서 전 세계
+      과학자들이 가장 신뢰하는 CO₂ 기준 자료로 씁니다.
+    - **기간**: 마우나로아에서 CO₂를 측정하기 시작한 1958년 이후, 두 자료(CO₂, 기온)가
       **공통으로 겹치는 전체 기간**을 다 보여주기 위해 이 범위를 선택했습니다.
-    - **기온 자료(GISTEMP)**: 특정 지역이 아니라 **전 지구 평균 기온 이상치**를 쓴 이유는, CO2 증가가
+    - **기온 자료(GISTEMP)**: 특정 지역이 아니라 **전 지구 평균 기온 이상치**를 쓴 이유는, CO₂ 증가가
       특정 나라만이 아니라 지구 전체에 미치는 영향이기 때문입니다.
 
     여러분이 자료를 고를 때도 "왜 이 지역/기간을 골랐는지" 이런 식으로 이유를 생각해보면 좋아요!
@@ -523,7 +523,7 @@ with st.expander("👀 선생님이 사용한 그래프 확인하기 (클릭해�
     with dl_col1:
         with open("data/co2_mm_mlo.csv", "rb") as f:
             st.download_button(
-                "⬇️ co2_mm_mlo.csv 다운로드 (마우나로아 월별 CO2 농도)",
+                "⬇️ co2_mm_mlo.csv 다운로드 (마우나로아 월별 CO₂ 농도)",
                 data=f,
                 file_name="co2_mm_mlo.csv",
                 mime="text/csv",
@@ -547,7 +547,7 @@ st.divider()
 # ---------------------------------------------------------
 st.subheader("✍️ 비교 후 생각해보기")
 match_check = st.radio(
-    "실제로 CO2가 늘어난 시기와 기온이 오른 시기가 일치하나요?",
+    "실제로 CO₂가 늘어난 시기와 기온이 오른 시기가 일치하나요?",
     ["선택해주세요", "대체로 일치한다", "일치하지 않는다", "판단하기 어렵다"]
 )
 topic_1 = st.text_area("이 데이터로 하고 싶은 탐구 주제를 적어보세요.", height=100, key="topic_1")

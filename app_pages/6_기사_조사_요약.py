@@ -57,29 +57,60 @@ action_global = st.text_area(
     height=80, key="action_global",
 )
 
+import re
+
+
+def looks_meaningless(text):
+    """'ㅁㄴㅇㄹ'처럼 자음/모음만 늘어놓거나 의미를 알아보기 힘든 입력을 감지한다.
+    완성된 한글 음절(가~힣), 영단어(2글자 이상), 숫자 중 하나라도 있으면 의미 있는 입력으로 본다."""
+    text = text.strip()
+    if not text:
+        return False
+    has_syllable = bool(re.search(r"[가-힣]", text))
+    has_word_like = bool(re.search(r"[A-Za-z]{2,}", text))
+    has_digit = bool(re.search(r"\d", text))
+    if has_syllable or has_word_like or has_digit:
+        return False
+    # 한글 자음/모음(ㄱ~ㅎ, ㅏ~ㅣ)이나 기호만으로 이루어진 경우
+    return bool(re.fullmatch(r"[ㄱ-ㅎㅏ-ㅣ\W_]+", text))
+
+
 if st.button("제출하기", key="actions_submit"):
-    filled = [bool(action_me.strip()), bool(action_nation.strip()), bool(action_global.strip())]
+    fields = [action_me, action_nation, action_global]
+    labels = ["나(개인)", "국가", "전 지구"]
+    filled = [bool(f.strip()) for f in fields]
+    garbled = [looks_meaningless(f) for f in fields]
+    garbled_names = [labels[i] for i in range(3) if filled[i] and garbled[i]]
+
     if not any(filled):
         st.warning("나·국가·전 지구 중 최소 한 가지 관점에서라도 적어주세요.")
+    elif garbled_names:
+        st.warning(
+            "🤔 " + ", ".join(garbled_names) + " 칸에 적어주신 내용이 무엇을 뜻하는지 알아보기 어려워요. "
+            "실제 문장으로 다시 한번 생각해서 적어볼까요?"
+        )
     elif all(filled):
         st.success("나·국가·전 지구, 세 관점을 모두 생각해봤네요! 개인의 실천부터 국제 협력까지 "
                    "다양한 층위에서 대응이 필요하다는 걸 잘 이해했어요. 👏")
         st.balloons()
     else:
-        missing = []
-        if not filled[0]:
-            missing.append("나(개인)")
-        if not filled[1]:
-            missing.append("국가")
-        if not filled[2]:
-            missing.append("전 지구")
+        missing = [labels[i] for i in range(3) if not filled[i]]
         st.info("좋은 시작이에요! " + ", ".join(missing) + " 관점에서도 할 수 있는 일을 생각해서 "
                 "채워보면 더 풍부한 답이 될 거예요.")
 
     with st.expander("🌱 다른 사람은 이렇게도 생각했어요 (참고 예시)"):
         st.markdown("""
-- 🙋 **나**: 대중교통을 이용하고, 사용하지 않는 전자기기의 전원을 꺼둔다.
-- 🏛️ **국가**: 재생에너지 발전 비중을 늘리고, 탄소 배출 규제를 강화한다.
-- 🌍 **전 지구**: 국제 협약(파리협정 등)을 통해 국가 간 온실가스 감축 목표를 함께 지키고 협력한다.
+- 🙋 **나(개인)**
+  - 대중교통이나 자전거를 이용하고, 사용하지 않는 전자기기의 전원을 꺼둔다.
+  - 일회용품 사용을 줄이고, 음식을 남기지 않아 음식물 쓰레기를 줄인다.
+  - 냉난방 온도를 적정하게 유지하고, 에너지 효율이 높은 가전제품을 사용한다.
+- 🏛️ **국가**
+  - 태양광·풍력 등 재생에너지 발전 비중을 늘리고, 탄소 배출 규제를 강화한다.
+  - 전기차·수소차 보급을 확대하고, 대중교통 인프라에 투자한다.
+  - 기업의 온실가스 배출량에 따라 탄소세를 부과하거나 배출권 거래제를 운영한다.
+- 🌍 **전 지구**
+  - 국제 협약(파리협정 등)을 통해 국가 간 온실가스 감축 목표를 함께 세우고 지킨다.
+  - 개발도상국의 친환경 기술 도입을 선진국이 재정적으로 지원한다.
+  - 국가 간 산림 보전·복원 협력(열대우림 보호 등)으로 탄소 흡수원을 늘린다.
 """)
         st.caption("정답이 정해진 문제가 아니에요. 내가 적은 답과 비교하며 새로운 아이디어를 더 떠올려보세요.")
