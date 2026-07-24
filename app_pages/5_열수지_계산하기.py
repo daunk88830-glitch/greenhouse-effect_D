@@ -42,23 +42,23 @@ with col_input:
     st.markdown("**지표**")
     sc1, sc2 = st.columns(2)
     with sc1:
-        surface_in = st.text_input("유입 에너지양", key="surface_in", placeholder="예: 144")
+        surface_in = st.text_input("유입 에너지양", key="surface_in", placeholder="계산한 값을 숫자로 적어보세요")
     with sc2:
-        surface_out = st.text_input("유출 에너지양", key="surface_out", placeholder="예: 144")
+        surface_out = st.text_input("유출 에너지양", key="surface_out", placeholder="계산한 값을 숫자로 적어보세요")
 
     st.markdown("**대기**")
     ac1, ac2 = st.columns(2)
     with ac1:
-        atmos_in = st.text_input("유입 에너지양", key="atmos_in", placeholder="예: 152")
+        atmos_in = st.text_input("유입 에너지양", key="atmos_in", placeholder="계산한 값을 숫자로 적어보세요")
     with ac2:
-        atmos_out = st.text_input("유출 에너지양", key="atmos_out", placeholder="예: 152")
+        atmos_out = st.text_input("유출 에너지양", key="atmos_out", placeholder="계산한 값을 숫자로 적어보세요")
 
     st.markdown("**우주**")
     uc1, uc2 = st.columns(2)
     with uc1:
-        space_in = st.text_input("유입 에너지양", key="space_in", placeholder="예: 100")
+        space_in = st.text_input("유입 에너지양", key="space_in", placeholder="계산한 값을 숫자로 적어보세요")
     with uc2:
-        space_out = st.text_input("유출 에너지양", key="space_out", placeholder="예: 100")
+        space_out = st.text_input("유출 에너지양", key="space_out", placeholder="계산한 값을 숫자로 적어보세요")
 
 if st.button("정답 확인", key="check1"):
     answers = [
