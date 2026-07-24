@@ -21,7 +21,7 @@ with col_img:
     st.image(
         "assets/textbook_heat_budget_diagram_only.png",
         caption="지구의 열수지 평형 (출처: 통합과학2_22개정 미래엔 82p)",
-        width=676,
+        use_container_width=True,
     )
 
 with col_input:
