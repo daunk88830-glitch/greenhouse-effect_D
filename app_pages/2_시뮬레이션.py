@@ -73,8 +73,27 @@ def draw_greenhouse(co2_ppm):
     rng = np.random.default_rng(42)
     rng.shuffle(labels)
     total = len(labels)
-    xs = rng.uniform(1.3, 8.7, total)
-    ys = rng.uniform(4.5, 5.4, total)
+
+    # 분자 개수가 많아지면 좁은 대기 띠 안에서 원끼리 겹쳐서 글자가 뭉개져 보일 수 있어,
+    # 최소 간격(min_dist)을 두고 자리를 잡는다(포아송 디스크와 비슷한 방식의 거부 샘플링).
+    def place_molecules(n, x_range=(1.3, 8.7), y_range=(4.4, 5.5), min_dist=0.5, max_tries=200):
+        pts = []
+        for _ in range(n):
+            x = y = None
+            for _try in range(max_tries):
+                cx = rng.uniform(*x_range)
+                cy = rng.uniform(*y_range)
+                if all((cx - px) ** 2 + (cy - py) ** 2 >= min_dist ** 2 for px, py in pts):
+                    x, y = cx, cy
+                    break
+            if x is None:
+                x, y = cx, cy  # 자리를 못 찾으면 마지막으로 뽑은 위치라도 사용
+            pts.append((x, y))
+        return pts
+
+    points = place_molecules(total)
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
     molecule_colors = {"$CO_2$": "#E76F51", "CH4": "#6A994E", "H2O": "#4A90D9"}
     for x, y, lab in zip(xs, ys, labels):
         ax.add_patch(plt.Circle((x, y), 0.22, color=molecule_colors[lab], alpha=0.9, zorder=3))
