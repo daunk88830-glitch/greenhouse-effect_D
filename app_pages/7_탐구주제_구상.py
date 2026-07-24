@@ -1,3 +1,5 @@
+import re
+
 import streamlit as st
 
 st.title("💡 2차시 - ④ 탐구주제 구상하기")
@@ -50,12 +52,38 @@ idea = st.text_area(
     height=150
 )
 
+def looks_meaningless(text):
+    """'ㅁㄴㅇㄹ'처럼 자음/모음만 늘어놓거나 의미를 알아보기 힘든 입력을 감지한다.
+    완성된 한글 음절(가~힣), 영단어(2글자 이상), 숫자 중 하나라도 있으면 의미 있는 입력으로 본다."""
+    text = text.strip()
+    if not text:
+        return False
+    has_syllable = bool(re.search(r"[가-힣]", text))
+    has_word_like = bool(re.search(r"[A-Za-z]{2,}", text))
+    has_digit = bool(re.search(r"\d", text))
+    if has_syllable or has_word_like or has_digit:
+        return False
+    return bool(re.fullmatch(r"[ㄱ-ㅎㅏ-ㅣ\W_]+", text))
+
+
 if st.button("제출하기"):
     has_dataset = bool(dataset_title.strip()) and bool(dataset_link.strip())
     has_idea = bool(idea.strip())
+    title_garbled = bool(dataset_title.strip()) and looks_meaningless(dataset_title)
+    idea_garbled = has_idea and looks_meaningless(idea)
 
     if not has_dataset and not has_idea:
         st.warning("공공데이터포털에서 찾은 데이터셋 제목·링크와, 탐구 아이디어를 모두 적어주세요.")
+    elif title_garbled or idea_garbled:
+        garbled_names = []
+        if title_garbled:
+            garbled_names.append("데이터셋 제목")
+        if idea_garbled:
+            garbled_names.append("탐구 아이디어")
+        st.warning(
+            "🤔 " + ", ".join(garbled_names) + " 칸에 적어주신 내용이 무엇을 뜻하는지 알아보기 어려워요. "
+            "실제 문장으로 다시 한번 생각해서 적어볼까요?"
+        )
     elif not has_dataset:
         st.info("탐구 아이디어는 잘 적었어요! 위에서 실제로 찾은 **데이터셋 제목과 링크**도 함께 적어주면 "
                 "탐구 계획이 더 구체적으로 완성돼요.")
