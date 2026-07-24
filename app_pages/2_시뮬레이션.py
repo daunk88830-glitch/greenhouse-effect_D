@@ -132,7 +132,7 @@ est_temp = 15 + delta_T
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("대기 재복사 강조")
+    st.subheader("CO₂ 농도에 따른 대기 재복사 변화")
     fig = draw_greenhouse(co2)
     st.pyplot(fig, use_container_width=True)
     st.markdown(
